@@ -1,0 +1,198 @@
+/* Request Quotation Form Styles */
+.request-quotation-container {
+    padding: 2rem 0;
+}
+
+.quotation-item {
+    transition: all 0.3s ease;
+    border: 1px solid #e5e7eb !important;
+}
+
+.quotation-item:hover {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.quotation-item h6 {
+    color: #111827 !important;
+    font-weight: 600;
+}
+
+.quotation-item .text-muted {
+    color: #6b7280 !important;
+}
+
+.quotation-item label {
+    color: #374151 !important;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.quotation-item .form-control {
+    border: 1px solid #d1d5db;
+    color: #111827 !important;
+}
+
+.quotation-item .form-control:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+    color: #111827 !important;
+}
+
+.quotation-summary .text-dark {
+    color: #111827 !important;
+}
+
+.quotation-summary strong {
+    color: #111827 !important;
+}
+
+/* Better form styling */
+.card .form-label {
+    color: #374151 !important;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.card .form-control {
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    color: #111827 !important;
+    background: #ffffff;
+}
+
+.card .form-control:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+    color: #111827 !important;
+}
+
+.card .form-control::placeholder {
+    color: #9ca3af !important;
+}
+
+/* Dark text for all cards */
+.card-body h5,
+.card-body h6,
+.card-body p,
+.card-body span,
+.card-body div {
+    color: #111827 !important;
+}
+
+.card-header h5 {
+    color: #111827 !important;
+}
+
+.text-muted {
+    color: #6b7280 !important;
+}
+
+/* Ensure proper contrast */
+.bg-light .text-dark,
+.bg-white .text-dark {
+    color: #111827 !important;
+}
+
+.form-text.text-muted {
+    color: #6b7280 !important;
+    font-size: 0.875rem;
+}
+
+/* Loading states for quotation requests */
+.quotation-loading {
+    opacity: 0.7;
+    position: relative;
+}
+
+.quotation-loading::after {
+    content: 'Loading product details...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+/* Product images in quotation form */
+.quotation-item img {
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.quotation-item:hover img {
+    border-color: #3b82f6;
+}
+
+/* Better button styling */
+.btn-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border: none;
+    color: #111827 !important;
+    font-weight: 600;
+}
+
+.btn-warning:hover {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    color: #111827 !important;
+    transform: translateY(-1px);
+}
+
+/* Alert styling improvements */
+.alert-info {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.2);
+    color: #1e40af !important;
+}
+
+.alert-info i {
+    color: #3b82f6 !important;
+}
+
+/* Sticky sidebar improvements */
+.position-sticky {
+    transition: all 0.3s ease;
+}
+
+@media (min-width: 992px) {
+    .position-sticky {
+        position: sticky !important;
+        top: 20px !important;
+    }
+}
+
+/* Form validation styles */
+.is-invalid {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.25) !important;
+}
+
+.text-danger {
+    color: #dc2626 !important;
+    font-size: 0.875rem;
+}
+
+/* Mobile responsiveness for quotation form */
+@media (max-width: 768px) {
+    .quotation-item {
+        margin-bottom: 1rem;
+    }
+    
+    .quotation-item .row {
+        flex-direction: column;
+    }
+    
+    .quotation-item .col-md-2,
+    .quotation-item .col-md-5 {
+        margin-bottom: 1rem;
+    }
+    
+    .position-sticky {
+        position: relative !important;
+        top: auto !important;
+    }
+}

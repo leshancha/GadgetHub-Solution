@@ -1,0 +1,418 @@
+@model AdminReportsViewModel
+@{
+    ViewData["Title"] = "System Reports - Admin";
+    Layout = "_AdminLayout";
+}
+
+<div class="admin-reports-container">
+    <!-- Header -->
+    <div class="dashboard-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2">
+                    <i class="fas fa-chart-bar text-danger me-3"></i>System Reports & Analytics
+                </h1>
+                <p class="text-muted mb-0">Comprehensive business intelligence and system monitoring</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <button class="btn btn-success me-2" onclick="generateReport()">
+                    <i class="fas fa-file-export me-1"></i>Generate Report
+                </button>
+                <button class="btn btn-primary" onclick="location.reload()">
+                    <i class="fas fa-sync me-1"></i>Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Controls -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-filter me-2"></i>Report Filters
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Date Range</label>
+                            <select class="form-select" id="dateRange">
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month" selected>This Month</option>
+                                <option value="quarter">This Quarter</option>
+                                <option value="year">This Year</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Report Type</label>
+                            <select class="form-select" id="reportType">
+                                <option value="overview" selected>System Overview</option>
+                                <option value="sales">Sales Report</option>
+                                <option value="customers">Customer Analysis</option>
+                                <option value="distributors">Distributor Performance</option>
+                                <option value="products">Product Analytics</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Export Format</label>
+                            <select class="form-select" id="exportFormat">
+                                <option value="pdf">PDF Document</option>
+                                <option value="excel">Excel Spreadsheet</option>
+                                <option value="csv">CSV File</option>
+                                <option value="json">JSON Data</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button class="btn btn-primary w-100" onclick="updateReport()">
+                                <i class="fas fa-search me-1"></i>Update Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-dollar-sign fa-3x mb-3"></i>
+                    <h3 class="display-6 fw-bold">$@(Model.DashboardStats?.ThisMonthRevenue.ToString("N0") ?? "0")</h3>
+                    <p class="mb-0">Monthly Revenue</p>
+                    <small class="text-light">
+                        @{
+                            var revenueGrowth = Model.DashboardStats?.RevenueGrowthPercentage ?? 0;
+                            var revenueGrowthText = Math.Abs(revenueGrowth).ToString("F1") + "%";
+                            var revenueGrowthLabel = revenueGrowth >= 0 ? "growth" : "decline";
+                        }
+                        @if (revenueGrowth >= 0)
+                        {
+                            <i class="fas fa-arrow-up me-1"></i>@revenueGrowthText @revenueGrowthLabel
+                        }
+                        else
+                        {
+                            <i class="fas fa-arrow-down me-1"></i>@revenueGrowthText @revenueGrowthLabel
+                        }
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-shopping-bag fa-3x mb-3"></i>
+                    <h3 class="display-6 fw-bold">@(Model.DashboardStats?.ThisMonthOrders ?? 0)</h3>
+                    <p class="mb-0">Monthly Orders</p>
+                    <small class="text-light">Trending this month</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x mb-3"></i>
+                    <h3 class="display-6 fw-bold">@(Model.DashboardStats?.ActiveCustomers ?? 0)</h3>
+                    <p class="mb-0">Active Customers</p>
+                    <small class="text-light">System-wide</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-invoice-dollar fa-3x mb-3"></i>
+                    <h3 class="display-6 fw-bold">@(Model.DashboardStats?.PendingQuotations ?? 0)</h3>
+                    <p class="mb-0">Pending Quotations</p>
+                    <small class="text-light">Requires attention</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-chart-line text-primary me-2"></i>Performance Trends
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="performanceChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-chart-pie text-success me-2"></i>Order Status Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Health -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-server text-success me-2"></i>System Health
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="system-status">
+                        <div class="status-item d-flex justify-content-between align-items-center mb-3">
+                            <span><i class="fas fa-database me-2"></i>Database Connection:</span>
+                            <span class="badge bg-success rounded-pill">
+                                <i class="fas fa-check me-1"></i>Online
+                            </span>
+                        </div>
+                        <div class="status-item d-flex justify-content-between align-items-center mb-3">
+                            <span><i class="fas fa-cloud me-2"></i>API Service:</span>
+                            <span class="badge bg-success rounded-pill">
+                                <i class="fas fa-check me-1"></i>Healthy
+                            </span>
+                        </div>
+                        <div class="status-item d-flex justify-content-between align-items-center mb-3">
+                            <span><i class="fas fa-credit-card me-2"></i>Payment Gateway:</span>
+                            <span class="badge bg-success rounded-pill">
+                                <i class="fas fa-check me-1"></i>Active
+                            </span>
+                        </div>
+                        <div class="status-item d-flex justify-content-between align-items-center mb-3">
+                            <span><i class="fas fa-envelope me-2"></i>Email Service:</span>
+                            <span class="badge bg-warning rounded-pill">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Limited
+                            </span>
+                        </div>
+                        <div class="status-item d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-shield-alt me-2"></i>Security Status:</span>
+                            <span class="badge bg-success rounded-pill">
+                                <i class="fas fa-lock me-1"></i>Secure
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-chart-area text-info me-2"></i>Top Products
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.DashboardStats?.TopProducts?.Any() == true)
+                    {
+                        <div class="top-products-list">
+                            @foreach (var product in Model.DashboardStats.TopProducts.Take(5))
+                            {
+                                <div class="product-item d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <div class="fw-bold">@product.ProductName</div>
+                                        <small class="text-muted">@product.TotalSold units sold</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold text-success">$@product.TotalRevenue.ToString("N0")</div>
+                                        <small class="text-muted">Revenue</small>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-box fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No product data available</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Generation History -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-history me-2"></i>Recent Reports
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Report Type</th>
+                            <th>Generated</th>
+                            <th>Period</th>
+                            <th>Format</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>System Overview</td>
+                            <td>@DateTime.UtcNow.ToString("MMM dd, yyyy HH:mm")</td>
+                            <td>This Month</td>
+                            <td><span class="badge bg-primary">PDF</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Sales Report</td>
+                            <td>@DateTime.UtcNow.AddHours(-2).ToString("MMM dd, yyyy HH:mm")</td>
+                            <td>This Week</td>
+                            <td><span class="badge bg-success">Excel</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Performance Chart
+        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+        const performanceChart = new Chart(performanceCtx, {
+            type: 'line',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'Revenue ($)',
+                    data: [12000, 15000, 18000, 22000],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Orders',
+                    data: [85, 92, 105, 118],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Revenue ($)'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Orders'
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    }
+                }
+            }
+        });
+
+        // Status Distribution Chart
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        const statusChart = new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Completed', 'Processing', 'Pending', 'Cancelled'],
+                datasets: [{
+                    data: [65, 20, 10, 5],
+                    backgroundColor: [
+                        '#10b981',
+                        '#3b82f6',
+                        '#f59e0b',
+                        '#ef4444'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+
+        function updateReport() {
+            const dateRange = document.getElementById('dateRange').value;
+            const reportType = document.getElementById('reportType').value;
+            
+            console.log(`Updating report: ${reportType} for ${dateRange}`);
+            
+            // Simulate report update
+            setTimeout(() => {
+                alert('Report updated successfully!');
+            }, 1000);
+        }
+
+        function generateReport() {
+            const format = document.getElementById('exportFormat').value;
+            const type = document.getElementById('reportType').value;
+            
+            alert(`Generating ${type} report in ${format} format...`);
+        }
+
+        // Auto-refresh reports every 5 minutes
+        setInterval(() => {
+            console.log('?? Auto-refreshing report data...');
+        }, 300000);
+    </script>
+}

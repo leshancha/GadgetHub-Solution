@@ -1,0 +1,286 @@
+@model AdminQuotationsViewModel
+@{
+    ViewData["Title"] = "Quotation Management - Admin";
+    Layout = "_AdminLayout";
+    var totalQuotations = ViewBag.TotalQuotations as int? ?? 0;
+    var pendingQuotations = ViewBag.PendingQuotations as int? ?? 0;
+    var completedQuotations = ViewBag.CompletedQuotations as int? ?? 0;
+    var activeQuotations = ViewBag.ActiveQuotations as int? ?? 0;
+}
+
+<div class="admin-quotations-container">
+    <!-- Header -->
+    <div class="dashboard-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2">
+                    <i class="fas fa-file-invoice-dollar text-warning me-3"></i>Quotation Management
+                </h1>
+                <p class="text-muted mb-0">Monitor quotation requests and responses system-wide</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <button class="btn btn-success me-2" onclick="exportQuotations()">
+                    <i class="fas fa-download me-1"></i>Export Data
+                </button>
+                <button class="btn btn-primary" onclick="location.reload()">
+                    <i class="fas fa-sync me-1"></i>Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card bg-warning">
+                <div class="stats-content">
+                    <div class="stats-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number">@totalQuotations</h3>
+                        <p class="stats-label">Total Quotations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card bg-danger">
+                <div class="stats-content">
+                    <div class="stats-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number">@pendingQuotations</h3>
+                        <p class="stats-label">Pending</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card bg-info">
+                <div class="stats-content">
+                    <div class="stats-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number">@activeQuotations</h3>
+                        <p class="stats-label">With Responses</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card bg-success">
+                <div class="stats-content">
+                    <div class="stats-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number">@completedQuotations</h3>
+                        <p class="stats-label">Completed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quotations Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-list me-2"></i>Quotation Requests
+                    </h5>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control" id="quotationSearch" placeholder="Search quotations...">
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Active">Active</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.QuotationRequests.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Request ID</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Responses</th>
+                                <th>Status</th>
+                                <th>Request Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var quotation in Model.QuotationRequests.OrderByDescending(q => q.RequestDate))
+                            {
+                                <tr class="quotation-row" data-quotation-id="@quotation.Id" data-status="@quotation.Status">
+                                    <td class="fw-bold text-primary">#@quotation.Id</td>
+                                    <td>
+                                        <div>
+                                            <div class="fw-bold">@quotation.CustomerName</div>
+                                            <small class="text-muted">@quotation.CustomerEmail</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark">
+                                            @quotation.ItemCount items (@quotation.TotalItems total)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (quotation.HasResponses)
+                                        {
+                                            <span class="badge bg-success rounded-pill">
+                                                <i class="fas fa-reply me-1"></i>@quotation.ResponseCount responses
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary rounded-pill">
+                                                <i class="fas fa-clock me-1"></i>No responses
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-@(GetQuotationStatusColor(quotation.Status, quotation.HasResponses)) rounded-pill">
+                                            <i class="fas fa-@(GetQuotationStatusIcon(quotation.Status, quotation.HasResponses)) me-1"></i>
+                                            @(quotation.HasResponses ? "Active" : quotation.Status)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <div class="fw-bold">@quotation.RequestDate.ToString("MMM dd, yyyy")</div>
+                                            <small class="text-muted">@quotation.RequestDate.ToString("HH:mm")</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    onclick="viewQuotation(@quotation.Id)">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            @if (quotation.HasResponses)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-success" 
+                                                        onclick="viewResponses(@quotation.Id)">
+                                                    <i class="fas fa-reply"></i>
+                                                </button>
+                                            }
+                                            <button type="button" class="btn btn-sm btn-outline-info" 
+                                                    onclick="viewCustomer(@quotation.CustomerId)">
+                                                <i class="fas fa-user"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-file-invoice-dollar fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted">No quotations found</h5>
+                    <p class="text-muted">No quotation requests have been made yet.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetQuotationStatusColor(string status, bool hasResponses)
+    {
+        if (hasResponses) return "info";
+        return status switch
+        {
+            "Pending" => "warning",
+            "Completed" => "success",
+            "Cancelled" => "danger",
+            _ => "secondary"
+        };
+    }
+
+    private string GetQuotationStatusIcon(string status, bool hasResponses)
+    {
+        if (hasResponses) return "handshake";
+        return status switch
+        {
+            "Pending" => "clock",
+            "Completed" => "check",
+            "Cancelled" => "times",
+            _ => "question"
+        };
+    }
+}
+
+@section Scripts {
+    <script>
+        // Search and filter functionality
+        document.getElementById('quotationSearch').addEventListener('input', filterQuotations);
+        document.getElementById('statusFilter').addEventListener('change', filterQuotations);
+
+        function filterQuotations() {
+            const searchTerm = document.getElementById('quotationSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const rows = document.querySelectorAll('.quotation-row');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const status = row.getAttribute('data-status');
+                
+                const matchesSearch = text.includes(searchTerm);
+                let matchesStatus = !statusFilter;
+                
+                if (statusFilter === 'Active') {
+                    matchesStatus = row.querySelector('.badge.bg-info') !== null;
+                } else if (statusFilter) {
+                    matchesStatus = status === statusFilter;
+                }
+                
+                row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+            });
+        }
+
+        function viewQuotation(quotationId) {
+            window.open(`/Customer/QuotationDetails/${quotationId}`, '_blank');
+        }
+
+        function viewResponses(quotationId) {
+            window.open(`/Customer/CompareQuotations?requestId=${quotationId}`, '_blank');
+        }
+
+        function viewCustomer(customerId) {
+            alert(`View customer details for ID: ${customerId}`);
+        }
+
+        function exportQuotations() {
+            window.open('/api/admin/export/quotations', '_blank');
+        }
+
+        // Real-time updates
+        setInterval(() => {
+            console.log('?? Checking for quotation updates...');
+        }, 30000);
+    </script>
+}

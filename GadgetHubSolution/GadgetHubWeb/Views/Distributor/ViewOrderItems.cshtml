@@ -1,0 +1,266 @@
+@model List<dynamic>
+@{
+    ViewData["Title"] = "View Order Items";
+    Layout = "_DistributorLayout";
+    var orderId = ViewBag.OrderId as int? ?? 0;
+    var customerName = ViewBag.CustomerName as string ?? "Customer";
+    var orderDate = ViewBag.OrderDate as DateTime? ?? DateTime.Now;
+    var orderStatus = ViewBag.OrderStatus as string ?? "Processing";
+    var totalAmount = ViewBag.TotalAmount as decimal? ?? 0;
+}
+
+<style>
+    .text-dark-enhanced { color: #212529 !important; font-weight: 500; }
+    .detail-label { color: #495057 !important; font-weight: 600; min-width: 140px; display: inline-block; }
+    .detail-value { color: #212529 !important; font-weight: 500; }
+    .card-body { background-color: #ffffff; }
+    h1, h2, h3, h4, h5, h6 { color: #212529 !important; }
+</style>
+
+<div class="view-order-items-container">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2 text-dark-enhanced">
+                    <i class="fas fa-list text-primary me-3"></i>Order Items
+                </h1>
+                <p class="text-muted mb-0">Order #@orderId - View detailed items and quantities</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="@Url.Action("OrdersReceived", "Distributor")" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Orders
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-shopping-bag me-2"></i>Order #@orderId
+                <span class="badge bg-light text-primary ms-2">@orderStatus</span>
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="fw-bold mb-3 text-dark-enhanced">Order Information</h6>
+                    <div class="detail-item mb-2">
+                        <span class="detail-label">Customer:</span>
+                        <span class="detail-value text-primary fw-bold">@customerName</span>
+                    </div>
+                    <div class="detail-item mb-2">
+                        <span class="detail-label">Order Date:</span>
+                        <span class="detail-value">@orderDate.ToString("MMMM dd, yyyy HH:mm")</span>
+                    </div>
+                    <div class="detail-item mb-2">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value">
+                            <span class="badge bg-primary">@orderStatus</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="fw-bold mb-3 text-dark-enhanced">Order Summary</h6>
+                    <div class="detail-item mb-2">
+                        <span class="detail-label">Total Items:</span>
+                        <span class="detail-value">@Model.Count items</span>
+                    </div>
+                    <div class="detail-item mb-2">
+                        <span class="detail-label">Total Amount:</span>
+                        <span class="detail-value text-success fw-bold">$@totalAmount.ToString("N2")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <!-- Order Items -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="mb-0 fw-bold text-dark-enhanced">
+                    <i class="fas fa-boxes text-secondary me-2"></i>Order Items Details
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="text-dark-enhanced">Product</th>
+                                <th class="text-dark-enhanced">Quantity</th>
+                                <th class="text-dark-enhanced">Unit Price</th>
+                                <th class="text-dark-enhanced">Total Price</th>
+                                <th class="text-dark-enhanced">Status</th>
+                                <th class="text-dark-enhanced">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="https://via.placeholder.com/60x60?text=IMG" 
+                                                 alt="@item.ProductName" class="product-thumbnail me-3" 
+                                                 style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #dee2e6;">
+                                            <div>
+                                                <h6 class="mb-1 fw-bold text-dark-enhanced">@item.ProductName</h6>
+                                                <small class="text-muted">@item.ProductBrand</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="quantity-display">
+                                            <span class="badge bg-primary fs-6">@item.Quantity units</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="text-success fw-bold">$@((decimal)item.UnitPrice).ToString("N2")</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-success fw-bold">$@((decimal)item.TotalPrice).ToString("N2")</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">@item.Status</span>
+                                    </td>
+                                    <td>
+                                        <div class="item-actions">
+                                            <button class="btn btn-outline-info btn-sm" onclick="viewProductDetails(@item.Id)" 
+                                                    data-bs-toggle="tooltip" title="View product details">
+                                                <i class="fas fa-info-circle"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning btn-sm ms-1" onclick="updateItemStatus(@item.Id)" 
+                                                    data-bs-toggle="tooltip" title="Update item status">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-section mt-4">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Order Processing:</strong> Review each item and update their status as you process the order.
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-grid gap-2">
+                        <button onclick="printPackingSlip(@orderId)" class="btn btn-success btn-lg">
+                            <i class="fas fa-print me-2"></i>Print Packing Slip
+                        </button>
+                        <button onclick="markAsShipped(@orderId)" class="btn btn-warning">
+                            <i class="fas fa-shipping-fast me-2"></i>Mark as Shipped
+                        </button>
+                        <a href="@Url.Action("OrdersReceived", "Distributor")" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Orders
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- No Items State -->
+        <div class="no-items-container text-center py-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <i class="fas fa-box-open fa-5x text-muted mb-4"></i>
+                    <h3 class="fw-bold mb-3 text-dark-enhanced">No Items Found</h3>
+                    <p class="text-muted mb-4">
+                        No items were found for this order. This might indicate a data issue.
+                    </p>
+                    <div class="mt-4">
+                        <a href="@Url.Action("OrdersReceived", "Distributor")" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Orders
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function viewProductDetails(itemId) {
+            alert(`Viewing product details for item ${itemId}`);
+        }
+
+        function updateItemStatus(itemId) {
+            alert(`Updating status for item ${itemId}`);
+        }
+
+        function printPackingSlip(orderId) {
+            // Show loading
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating...';
+            btn.disabled = true;
+
+            // Simulate print generation
+            setTimeout(() => {
+                alert(`? Packing slip generated for Order #${orderId}`);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 1500);
+        }
+
+        function markAsShipped(orderId) {
+            if (confirm('Are you sure you want to mark this order as shipped?')) {
+                // Show loading
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+                btn.disabled = true;
+
+                // Submit status update
+                fetch('@Url.Action("UpdateOrderStatus", "Distributor")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `orderId=${orderId}&status=Shipped&__RequestVerificationToken=${$('[name=__RequestVerificationToken]').val()}`
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('? Order marked as shipped successfully!');
+                        window.location.href = '@Url.Action("OrdersReceived", "Distributor")';
+                    } else {
+                        throw new Error('Failed to update order status');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    alert('? Error updating order status. Please try again.');
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            console.log('? Order items view loaded for Order #@orderId with @Model.Count items');
+        });
+    </script>
+}

@@ -1,0 +1,316 @@
+@model CreateQuotationRequestViewModel
+@{
+    ViewData["Title"] = "Request Quotation";
+    Layout = "_CustomerLayout";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/quotation.css" asp-append-version="true" />
+}
+
+<div class="request-quotation-container">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <h1 class="display-6 fw-bold mb-2">
+            <i class="fas fa-file-invoice-dollar text-warning me-3"></i>Request Quotation
+        </h1>
+        <p class="text-muted mb-0">Get competitive quotes from multiple distributors for your items</p>
+    </div>
+
+    <form asp-action="RequestQuotation" method="post">
+        @Html.AntiForgeryToken()
+        <div class="row">
+            <!-- Items to Quote -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-list text-primary me-2"></i>Items for Quotation
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Items.Any())
+                        {
+                            @for (int i = 0; i < Model.Items.Count; i++)
+                            {
+                                <div class="quotation-item border rounded p-3 mb-3 bg-light" data-product-id="@Model.Items[i].ProductId">
+                                    <input type="hidden" asp-for="Items[i].ProductId" />
+                                    <div class="row align-items-center">
+                                        <div class="col-md-2">
+                                            <img src="https://via.placeholder.com/80x80?text=Loading..." 
+                                                 alt="Product Image" 
+                                                 class="img-fluid rounded product-image">
+                                        </div>
+                                        <div class="col-md-5">
+                                            <h6 class="fw-bold mb-1 text-dark product-name">Loading product...</h6>
+                                            <p class="text-muted small mb-0 product-description">Please wait while we load product details</p>
+                                            <div class="mt-2">
+                                                <label asp-for="Items[i].Quantity" class="form-label small fw-bold text-dark">Quantity:</label>
+                                                <input asp-for="Items[i].Quantity" type="number" class="form-control form-control-sm d-inline-block" min="1" style="width: 100px;" value="@Model.Items[i].Quantity">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label asp-for="Items[i].Specifications" class="form-label small fw-bold text-dark">Special Requirements:</label>
+                                            <textarea asp-for="Items[i].Specifications" class="form-control form-control-sm" rows="2" placeholder="Any specific requirements or notes..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No items in cart</h5>
+                                <p class="text-muted">Add items to your cart before requesting a quotation.</p>
+                                <a href="@Url.Action("Products", "Home")" class="btn btn-primary">
+                                    <i class="fas fa-shopping-bag me-2"></i>Browse Products
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Quotation Details -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-info-circle text-info me-2"></i>Quotation Details
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="RequiredDate" class="form-label fw-bold text-dark">Required By Date</label>
+                                    <input asp-for="RequiredDate" type="date" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-dd")" required>
+                                    <small class="form-text text-muted">When do you need these items?</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="ContactPhone" class="form-label fw-bold text-dark">Contact Phone</label>
+                                    <input asp-for="ContactPhone" type="tel" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="DeliveryAddress" class="form-label fw-bold text-dark">Delivery Address</label>
+                                    <textarea asp-for="DeliveryAddress" class="form-control" rows="3" required placeholder="Enter your complete delivery address..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label fw-bold text-dark">Additional Notes (Optional)</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Any additional requirements, preferences, or questions for the distributors..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quotation Summary -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm position-sticky" style="top: 20px;">
+                    <div class="card-header bg-warning text-dark py-3">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-file-invoice me-2"></i>Quotation Summary
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="quotation-info">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-dark">Total Items:</span>
+                                <strong class="text-dark" id="totalItems">@Model.Items.Count</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-dark">Total Quantity:</span>
+                                <strong class="text-dark" id="totalQuantity">@Model.Items.Sum(x => x.Quantity)</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="text-dark">Required By:</span>
+                                <strong class="text-dark" id="requiredDate">@Model.RequiredDate.ToString("MMM dd, yyyy")</strong>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <small>
+                                <strong>How it works:</strong><br>
+                                • Distributors will review your request<br>
+                                • You'll receive multiple quotes<br>
+                                • Compare prices and delivery times<br>
+                                • Choose the best offer
+                            </small>
+                        </div>
+
+                        @if (Model.Items.Any())
+                        {
+                            <button type="submit" class="btn btn-warning btn-lg w-100 mb-2" id="submitBtn">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Quotation Request
+                            </button>
+                        }
+                        <a href="@Url.Action("Cart", "Home")" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Cart
+                        </a>
+
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                Expect responses within 24-48 hours
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // Load product details for each item
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProductDetails();
+            updateTotals();
+            setupEventListeners();
+        });
+
+        async function loadProductDetails() {
+            const items = document.querySelectorAll('.quotation-item');
+            
+            for (let item of items) {
+                const productId = item.querySelector('input[type="hidden"]').value;
+                try {
+                    // Add loading state
+                    item.classList.add('quotation-loading');
+                    
+                    const response = await fetch(`/Home/GetProductDetails/${productId}`);
+                    if (response.ok) {
+                        const product = await response.json();
+                        const nameElement = item.querySelector('.product-name');
+                        const descElement = item.querySelector('.product-description');
+                        const imgElement = item.querySelector('.product-image');
+                        
+                        nameElement.textContent = product.name || `Product ${productId}`;
+                        descElement.textContent = product.brand ? `${product.brand} - ${product.description || 'Product details'}` : 'Product information';
+                        
+                        if (product.imageUrl) {
+                            imgElement.src = product.imageUrl;
+                            imgElement.alt = product.name;
+                        } else {
+                            imgElement.src = 'https://via.placeholder.com/80x80?text=Product';
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Could not load product details for ID:', productId);
+                    const nameElement = item.querySelector('.product-name');
+                    nameElement.textContent = `Product ID: ${productId}`;
+                } finally {
+                    // Remove loading state
+                    item.classList.remove('quotation-loading');
+                }
+            }
+        }
+
+        function setupEventListeners() {
+            // Update quantity display
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.addEventListener('change', function() {
+                    updateTotals();
+                });
+            });
+
+            // Update required date display
+            document.querySelector('input[name="RequiredDate"]')?.addEventListener('change', function() {
+                const date = new Date(this.value);
+                const formattedDate = date.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+                const requiredDateElement = document.getElementById('requiredDate');
+                if (requiredDateElement) {
+                    requiredDateElement.textContent = formattedDate;
+                }
+            });
+        }
+
+        function updateTotals() {
+            const quantities = document.querySelectorAll('input[type="number"]');
+            let totalQuantity = 0;
+            
+            quantities.forEach(input => {
+                totalQuantity += parseInt(input.value) || 0;
+            });
+            
+            // Update the summary
+            const totalQtyElement = document.getElementById('totalQuantity');
+            if (totalQtyElement) {
+                totalQtyElement.textContent = totalQuantity;
+            }
+        }
+
+        // Form validation and submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submitBtn');
+            const requiredFields = ['RequiredDate', 'ContactPhone', 'DeliveryAddress'];
+            let isValid = true;
+            
+            // Validate required fields
+            requiredFields.forEach(fieldName => {
+                const field = document.querySelector(`[name="${fieldName}"]`);
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                    field.focus();
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please fill in all required fields before submitting.');
+                return;
+            }
+
+            // Show loading state
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting Request...';
+            }
+        });
+
+        // Auto-save form data to localStorage
+        function saveFormData() {
+            const formData = {
+                notes: document.querySelector('[name="Notes"]')?.value || '',
+                requiredDate: document.querySelector('[name="RequiredDate"]')?.value || '',
+                contactPhone: document.querySelector('[name="ContactPhone"]')?.value || '',
+                deliveryAddress: document.querySelector('[name="DeliveryAddress"]')?.value || ''
+            };
+            localStorage.setItem('quotationFormData', JSON.stringify(formData));
+        }
+
+        // Load saved form data
+        function loadFormData() {
+            try {
+                const savedData = localStorage.getItem('quotationFormData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    document.querySelector('[name="Notes"]').value = data.notes || '';
+                    document.querySelector('[name="ContactPhone"]').value = data.contactPhone || '';
+                    document.querySelector('[name="DeliveryAddress"]').value = data.deliveryAddress || '';
+                }
+            } catch (error) {
+                console.warn('Could not load saved form data');
+            }
+        }
+
+        // Save form data on input
+        document.querySelectorAll('input, textarea').forEach(input => {
+            input.addEventListener('input', saveFormData);
+        });
+
+        // Load saved data on page load
+        loadFormData();
+    </script>
+}

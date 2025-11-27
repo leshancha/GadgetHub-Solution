@@ -1,0 +1,935 @@
+﻿@using GadgetHubWeb.Models
+@using GadgetHubWeb.Models.DTOs
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_AdminLayout";
+    var dashboardStats = ViewBag.DashboardStats as DashboardStatsDto;
+    var totalProducts = ViewBag.TotalProducts as int? ?? 0;
+    var totalCategories = ViewBag.TotalCategories as int? ?? 0;
+    var totalDistributors = ViewBag.TotalDistributors as int? ?? 0;
+    var totalCustomers = ViewBag.TotalCustomers as int? ?? 0;
+}
+
+<style>
+    /* 🎨 Enhanced Admin Dashboard - High Contrast Professional Theme */
+    .admin-dashboard-enhanced {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #f1f5f9 100%);
+        min-height: 100vh;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .admin-header-enhanced {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 2px solid #dc2626;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(220, 38, 38, 0.15);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .admin-header-enhanced::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #dc2626 0%, #ef4444 50%, #f87171 100%);
+    }
+    
+    .admin-stats-enhanced {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .admin-stats-enhanced::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--card-accent, linear-gradient(90deg, #3b82f6 0%, #2563eb 100%));
+    }
+    
+    .admin-stats-enhanced:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+    
+    .admin-stats-enhanced.stat-customers::before {
+        background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+    }
+    
+    .admin-stats-enhanced.stat-distributors::before {
+        background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    }
+    
+    .admin-stats-enhanced.stat-products::before {
+        background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+    }
+    
+    .admin-stats-enhanced.stat-orders::before {
+        background: linear-gradient(90deg, #06b6d4 0%, #0891b2 100%);
+    }
+    
+    .admin-icon-enhanced {
+        width: 70px;
+        height: 70px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: white;
+        margin-bottom: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .admin-icon-enhanced::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+        transform: rotate(45deg);
+        animation: iconShimmer 3s infinite;
+    }
+    
+    .admin-number-enhanced {
+        font-size: 3rem;
+        font-weight: 900;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+        color: #1e293b !important; /* Force dark color */
+    }
+    
+    .admin-label-enhanced {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #374151 !important; /* Darker gray for better visibility */
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .admin-management-enhanced {
+        background: white;
+        border: 2px solid #f1f5f9;
+        border-radius: 16px;
+        transition: all 0.3s ease;
+        height: 100%;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .admin-management-enhanced:hover {
+        border-color: #dc2626;
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(220, 38, 38, 0.2);
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .admin-management-enhanced::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 100%;
+        background: linear-gradient(90deg, rgba(220, 38, 38, 0.05) 0%, transparent 100%);
+        transition: width 0.3s ease;
+    }
+    
+    .admin-management-enhanced:hover::before {
+        width: 100%;
+    }
+    
+    .management-icon-enhanced {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+        color: white;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .admin-activity-enhanced {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+    
+    .activity-item-enhanced {
+        display: flex;
+        align-items: flex-start;
+        padding: 1.25rem 0;
+        border-bottom: 1px solid #f1f5f9;
+        transition: all 0.2s ease;
+    }
+    
+    .activity-item-enhanced:hover {
+        background: #f8fafc;
+        transform: translateX(4px);
+    }
+    
+    .activity-item-enhanced:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-icon-enhanced {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        flex-shrink: 0;
+        color: white;
+        font-size: 1.25rem;
+    }
+    
+    .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        gap: 0.5rem;
+    }
+    
+    .status-online {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .status-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+    
+    .status-pulse {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: white;
+        animation: statusPulse 1.5s infinite;
+    }
+    
+    .revenue-card-enhanced {
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 1.5rem;
+        position: relative;
+    }
+    
+    .revenue-item-enhanced {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .revenue-item-enhanced:last-child {
+        border-bottom: none;
+    }
+    
+    .growth-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* High Contrast Text Fixes */
+    .admin-dashboard-enhanced h1,
+    .admin-dashboard-enhanced h2,
+    .admin-dashboard-enhanced h3,
+    .admin-dashboard-enhanced h4,
+    .admin-dashboard-enhanced h5,
+    .admin-dashboard-enhanced h6 {
+        color: #1e293b !important;
+    }
+
+    .admin-dashboard-enhanced p {
+        color: #374151 !important;
+    }
+
+    .admin-dashboard-enhanced .small {
+        color: #4b5563 !important;
+    }
+
+    .admin-dashboard-enhanced .fw-semibold {
+        color: #1e293b !important;
+    }
+
+    .admin-dashboard-enhanced .fw-bold {
+        color: #1e293b !important;
+    }
+    
+    /* Animations */
+    @@keyframes iconShimmer {
+        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+    
+    @@keyframes statusPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.6; transform: scale(1.2); }
+    }
+    
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    /* Responsive improvements */
+    @@media (max-width: 768px) {
+        .admin-header-enhanced {
+            padding: 1.5rem;
+        }
+        
+        .admin-number-enhanced {
+            font-size: 2.5rem;
+        }
+        
+        .admin-icon-enhanced {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+        }
+        
+        .management-icon-enhanced {
+            width: 50px;
+            height: 50px;
+            font-size: 1.25rem;
+        }
+    }
+</style>
+
+<div class="dashboard-container admin-dashboard-enhanced">
+    <!-- 🎨 Enhanced Admin Dashboard Header -->
+    <div class="admin-header-enhanced fade-in-up">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2" style="color: #dc2626 !important;">
+                    <i class="fas fa-shield-alt me-3"></i>ADMIN CONTROL PANEL
+                </h1>
+                <p class="mb-0 fs-5" style="color: #374151 !important;">Complete system oversight and management dashboard</p>
+                <div class="mt-3">
+                    <span class="status-indicator status-online">
+                        <span class="status-pulse"></span>
+                        All Systems Operational
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="admin-time-enhanced p-3 rounded" style="background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); border: 1px solid #cbd5e1;">
+                    <div class="fw-bold" style="color: #dc2626 !important;">
+                        <i class="fas fa-clock me-2"></i>SYSTEM TIME
+                    </div>
+                    <div class="small mt-2" style="color: #4b5563 !important;">
+                        @DateTime.UtcNow.ToString("MMM dd, yyyy")
+                    </div>
+                    <div class="small" style="color: #4b5563 !important;">
+                        @DateTime.UtcNow.ToString("HH:mm:ss") UTC
+                    </div>
+                    <div class="small mt-2 fw-semibold" style="color: #1e293b !important;">
+                        <i class="fas fa-user-shield me-1"></i>@Model.UserName
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎨 Enhanced Admin Metrics -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-3 col-md-6">
+            <div class="admin-stats-enhanced stat-customers fade-in-up">
+                <div class="p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="admin-icon-enhanced bg-primary">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="flex-grow-1 text-end">
+                            <div class="admin-number-enhanced">@totalCustomers</div>
+                            <div class="admin-label-enhanced">Total Customers</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-top">
+                        <a href="@Url.Action("Customers", "Admin")" class="btn btn-primary btn-sm rounded-pill px-3">
+                            <i class="fas fa-arrow-right me-1"></i>Manage Customers
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="admin-stats-enhanced stat-distributors fade-in-up" style="animation-delay: 0.1s;">
+                <div class="p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="admin-icon-enhanced bg-success">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div class="flex-grow-1 text-end">
+                            <div class="admin-number-enhanced">@totalDistributors</div>
+                            <div class="admin-label-enhanced">Active Distributors</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-top">
+                        <a href="@Url.Action("Distributors", "Admin")" class="btn btn-success btn-sm rounded-pill px-3">
+                            <i class="fas fa-arrow-right me-1"></i>Manage Distributors
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="admin-stats-enhanced stat-products fade-in-up" style="animation-delay: 0.2s;">
+                <div class="p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="admin-icon-enhanced bg-warning">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="flex-grow-1 text-end">
+                            <div class="admin-number-enhanced">@totalProducts</div>
+                            <div class="admin-label-enhanced">Products Available</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-top">
+                        <span class="badge bg-warning text-dark">
+                            <i class="fas fa-layer-group me-1"></i>@totalCategories Categories
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="admin-stats-enhanced stat-orders fade-in-up" style="animation-delay: 0.3s;">
+                <div class="p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="admin-icon-enhanced bg-info">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <div class="flex-grow-1 text-end">
+                            <div class="admin-number-enhanced">@(dashboardStats?.TodayOrders ?? 0)</div>
+                            <div class="admin-label-enhanced">Today's Orders</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-top">
+                        <a href="@Url.Action("Orders", "Admin")" class="btn btn-info btn-sm rounded-pill px-3">
+                            <i class="fas fa-arrow-right me-1"></i>View All Orders
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎨 Revenue & Analytics Section -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-8">
+            <div class="admin-activity-enhanced h-100">
+                <div class="card-header bg-white py-4 px-4">
+                    <h5 class="mb-0 fw-bold" style="color: #dc2626 !important;">
+                        <i class="fas fa-chart-line me-2"></i>Revenue & Performance Overview
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <canvas id="revenueChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="admin-activity-enhanced h-100">
+                <div class="card-header bg-white py-4 px-4">
+                    <h5 class="mb-0 fw-bold" style="color: #10b981 !important;">
+                        <i class="fas fa-dollar-sign me-2"></i>Revenue Analytics
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="revenue-stats">
+                        <div class="revenue-item-enhanced">
+                            <div>
+                                <div class="fw-semibold" style="color: #4b5563 !important;">Today's Revenue</div>
+                                <div class="fs-4 fw-bold" style="color: #10b981 !important;">$@(dashboardStats?.TodayRevenue.ToString("N2") ?? "0.00")</div>
+                            </div>
+                        </div>
+                        <div class="revenue-item-enhanced">
+                            <div>
+                                <div class="fw-semibold" style="color: #4b5563 !important;">This Month</div>
+                                <div class="fs-4 fw-bold" style="color: #3b82f6 !important;">$@(dashboardStats?.ThisMonthRevenue.ToString("N2") ?? "0.00")</div>
+                            </div>
+                        </div>
+                        <div class="revenue-item-enhanced">
+                            <div>
+                                <div class="fw-semibold" style="color: #4b5563 !important;">Last Month</div>
+                                <div class="fs-5 fw-bold" style="color: #4b5563 !important;">$@(dashboardStats?.LastMonthRevenue.ToString("N2") ?? "0.00")</div>
+                            </div>
+                        </div>
+                        <hr class="my-4">
+                        <div class="text-center">
+                            <div class="growth-badge @(dashboardStats?.RevenueGrowthPercentage >= 0 ? "status-online" : "status-warning")">
+                                <i class="fas fa-arrow-@(dashboardStats?.RevenueGrowthPercentage >= 0 ? "up" : "down")"></i>
+                                @Math.Abs(dashboardStats?.RevenueGrowthPercentage ?? 0).ToString("F1")%
+                            </div>
+                            <p class="small mt-2 mb-0" style="color: #4b5563 !important;">Growth vs last month</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎨 Enhanced System Management -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-12">
+            <div class="admin-activity-enhanced">
+                <div class="card-header bg-white py-4 px-4">
+                    <h5 class="mb-0 fw-bold" style="color: #f59e0b !important;">
+                        <i class="fas fa-cogs me-2"></i>SYSTEM MANAGEMENT CENTER
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <a href="@Url.Action("Customers", "Admin")" class="admin-management-enhanced text-decoration-none">
+                                <div class="text-center p-4">
+                                    <div class="management-icon-enhanced bg-primary">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-2" style="color: #1e293b !important;">Customers</h6>
+                                    <p class="small mb-0" style="color: #4b5563 !important;">Manage customer accounts</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <a href="@Url.Action("Distributors", "Admin")" class="admin-management-enhanced text-decoration-none">
+                                <div class="text-center p-4">
+                                    <div class="management-icon-enhanced bg-success">
+                                        <i class="fas fa-building"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-2" style="color: #1e293b !important;">Distributors</h6>
+                                    <p class="small mb-0" style="color: #4b5563 !important;">Manage distributor network</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <a href="@Url.Action("Orders", "Admin")" class="admin-management-enhanced text-decoration-none">
+                                <div class="text-center p-4">
+                                    <div class="management-icon-enhanced bg-info">
+                                        <i class="fas fa-shopping-bag"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-2" style="color: #1e293b !important;">Orders</h6>
+                                    <p class="small mb-0" style="color: #4b5563 !important;">Monitor all orders</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <a href="@Url.Action("Quotations", "Admin")" class="admin-management-enhanced text-decoration-none">
+                                <div class="text-center p-4">
+                                    <div class="management-icon-enhanced bg-warning">
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-2" style="color: #1e293b !important;">Quotations</h6>
+                                    <p class="small mb-0" style="color: #4b5563 !important;">Track quotation requests</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <a href="@Url.Action("Reports", "Admin")" class="admin-management-enhanced text-decoration-none">
+                                <div class="text-center p-4">
+                                    <div class="management-icon-enhanced bg-danger">
+                                        <i class="fas fa-chart-bar"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-2" style="color: #1e293b !important;">Reports</h6>
+                                    <p class="small mb-0" style="color: #4b5563 !important;">Analytics & insights</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-lg-2 col-md-4 col-sm-6">
+                            <div class="admin-management-enhanced">
+                                <div class="text-center p-4">
+                                    <div class="management-icon-enhanced bg-secondary">
+                                        <i class="fas fa-cog"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-2" style="color: #1e293b !important;">Settings</h6>
+                                    <p class="small mb-0" style="color: #4b5563 !important;">System configuration</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎨 Enhanced Activity Section -->
+    <div class="row g-4">
+        <!-- Recent Orders -->
+        <div class="col-lg-6">
+            <div class="admin-activity-enhanced h-100">
+                <div class="card-header bg-white py-4 px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold" style="color: #3b82f6 !important;">
+                            <i class="fas fa-shopping-bag me-2"></i>Recent Order Activity
+                        </h5>
+                        <a href="@Url.Action("Orders", "Admin")" class="btn btn-sm btn-outline-primary rounded-pill">
+                            <i class="fas fa-eye me-1"></i>View All
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="activity-list">
+                        <div class="activity-item-enhanced">
+                            <div class="activity-icon-enhanced bg-success">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h6 class="mb-1 fw-bold" style="color: #1e293b !important;">Order #1001 Delivered</h6>
+                                <p class="small mb-1" style="color: #4b5563 !important;">John Customer • $899.99</p>
+                                <span class="badge bg-success rounded-pill small">COMPLETED</span>
+                            </div>
+                        </div>
+                        <div class="activity-item-enhanced">
+                            <div class="activity-icon-enhanced bg-warning">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h6 class="mb-1 fw-bold" style="color: #1e293b !important;">Order #1002 Processing</h6>
+                                <p class="small mb-1" style="color: #4b5563 !important;">Jane Smith • $1,299.99</p>
+                                <span class="badge bg-warning rounded-pill small">IN PROGRESS</span>
+                            </div>
+                        </div>
+                        <div class="activity-item-enhanced">
+                            <div class="activity-icon-enhanced bg-info">
+                                <i class="fas fa-shipping-fast"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h6 class="mb-1 fw-bold" style="color: #1e293b !important;">Order #1003 Shipped</h6>
+                                <p class="small mb-1" style="color: #4b5563 !important;">Bob Wilson • $599.99</p>
+                                <span class="badge bg-info rounded-pill small">SHIPPED</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="col-lg-6">
+            <div class="admin-activity-enhanced h-100">
+                <div class="card-header bg-white py-4 px-4">
+                    <h5 class="mb-0 fw-bold" style="color: #10b981 !important;">
+                        <i class="fas fa-server me-2"></i>System Health Monitor
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="system-status">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-semibold" style="color: #1e293b !important;">API Service</span>
+                            <span class="status-indicator status-online">
+                                <span class="status-pulse"></span>
+                                Online
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-semibold" style="color: #1e293b !important;">Database</span>
+                            <span class="status-indicator status-online">
+                                <span class="status-pulse"></span>
+                                Connected
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-semibold" style="color: #1e293b !important;">Payment Gateway</span>
+                            <span class="status-indicator status-online">
+                                <span class="status-pulse"></span>
+                                Active
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <span class="fw-semibold" style="color: #1e293b !important;">Email Service</span>
+                            <span class="status-indicator status-warning">
+                                <span class="status-pulse"></span>
+                                Limited
+                            </span>
+                        </div>
+                        <hr>
+                        <div class="system-info">
+                            <p class="small mb-1" style="color: #4b5563 !important;">
+                                <i class="fas fa-clock me-1"></i>
+                                Last system check: @DateTime.UtcNow.ToString("HH:mm:ss UTC")
+                            </p>
+                            <p class="small mb-0" style="color: #4b5563 !important;">
+                                <i class="fas fa-code me-1"></i>
+                                Version 1.0.0 - Built by <strong style="color: #dc2626 !important;">leshancha</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Enhanced Revenue Chart
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        const revenueChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                datasets: [{
+                    label: 'Revenue ($)',
+                    data: [12000, 19000, 15000, 25000, 22000, 30000, 35000],
+                    borderColor: '#dc2626',
+                    backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#dc2626',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2
+                }, {
+                    label: 'Orders',
+                    data: [65, 85, 70, 95, 88, 110, 125],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    yAxisID: 'y1',
+                    pointBackgroundColor: '#10b981',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            font: {
+                                family: 'Inter',
+                                weight: '600'
+                            },
+                            color: '#1e293b'
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Monthly Performance Analytics',
+                        font: {
+                            family: 'Inter',
+                            size: 16,
+                            weight: '700'
+                        },
+                        color: '#1e293b'
+                    }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Revenue ($)',
+                            font: {
+                                family: 'Inter',
+                                weight: '600'
+                            },
+                            color: '#1e293b'
+                        },
+                        grid: {
+                            color: '#f1f5f9'
+                        },
+                        ticks: {
+                            color: '#4b5563'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Orders',
+                            font: {
+                                family: 'Inter',
+                                weight: '600'
+                            },
+                            color: '#1e293b'
+                        },
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                        ticks: {
+                            color: '#4b5563'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: '#f1f5f9'
+                        },
+                        ticks: {
+                            color: '#4b5563'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Enhanced dashboard functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-refresh dashboard every 2 minutes
+            setInterval(function() {
+                console.log('🎨 Admin Dashboard: Refreshing system data...');
+                
+                // Add subtle refresh animation
+                const cards = document.querySelectorAll('.admin-stats-enhanced');
+                cards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.style.transform = 'scale(0.98)';
+                        setTimeout(() => {
+                            card.style.transform = 'scale(1)';
+                        }, 150);
+                    }, index * 100);
+                });
+                
+                // Full reload every 2 minutes
+                setTimeout(() => location.reload(), 120000);
+            }, 5000);
+
+            // Real-time clock update
+            function updateClock() {
+                const now = new Date();
+                const timeElements = document.querySelectorAll('.admin-time-enhanced .small');
+                if (timeElements.length >= 2) {
+                    timeElements[0].textContent = now.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: '2-digit', 
+                        year: 'numeric' 
+                    });
+                    timeElements[1].textContent = now.toLocaleTimeString('en-US', { 
+                        hour12: false,
+                        timeZone: 'UTC'
+                    }) + ' UTC';
+                }
+            }
+
+            setInterval(updateClock, 1000);
+            updateClock();
+
+            // Enhanced card interactions
+            document.querySelectorAll('.admin-management-enhanced').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-6px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // System status monitoring simulation
+            function simulateSystemCheck() {
+                const statusIndicators = document.querySelectorAll('.status-pulse');
+                statusIndicators.forEach(indicator => {
+                    indicator.style.animationDuration = '0.5s';
+                    setTimeout(() => {
+                        indicator.style.animationDuration = '1.5s';
+                    }, 2000);
+                });
+            }
+
+            setInterval(simulateSystemCheck, 30000);
+
+            // Image loading enhancement for any dashboard images
+            document.querySelectorAll('img').forEach(img => {
+                img.addEventListener('error', function() {
+                    // Create professional admin-style placeholder
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'admin-image-placeholder';
+                    placeholder.style.cssText = `
+                        width: ${this.width || '100'}px;
+                        height: ${this.height || '100'}px;
+                        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-weight: bold;
+                        border-radius: 8px;
+                        font-size: 0.875rem;
+                    `;
+                    placeholder.innerHTML = '<i class="fas fa-image"></i>';
+                    this.parentNode.replaceChild(placeholder, this);
+                });
+            });
+
+            console.log(`
+🎨 GADGET HUB ADMIN CONTROL PANEL - HIGH CONTRAST
+=================================================
+╔════════════════════════════════╗
+║ ADMINISTRATOR: @Model.UserName           ║
+║ STATUS: OPERATIONAL            ║
+║ CUSTOMERS: @totalCustomers active         ║
+║ DISTRIBUTORS: @totalDistributors partners    ║
+║ PRODUCTS: @totalProducts available       ║
+║ TODAY'S ORDERS: @(dashboardStats?.TodayOrders ?? 0)          ║
+╚════════════════════════════════╝
+Enhanced admin theme with high contrast activated! 🚀
+            `);
+        });
+    </script>
+}

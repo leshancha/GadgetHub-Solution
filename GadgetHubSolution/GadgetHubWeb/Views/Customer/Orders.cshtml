@@ -1,0 +1,262 @@
+﻿@model List<OrderDto>
+@{
+    ViewData["Title"] = "My Orders";
+    Layout = "_CustomerLayout";
+}
+
+<div class="orders-container">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2">
+                    <i class="fas fa-box text-primary me-3"></i>My Orders
+                </h1>
+                <p class="text-muted mb-0">Track and manage your order history</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="order-stats">
+                    <span class="badge bg-primary rounded-pill fs-6">@Model.Count Total Orders</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <!-- Orders List -->
+        <div class="orders-list">
+            @foreach (var order in Model)
+            {
+                <div class="order-card mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0 py-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h5 class="mb-0 fw-bold">
+                                        Order #@order.Id
+                                        @{
+                                            var statusClass = order.Status == "Delivered" ? "success" :
+                                            order.Status == "Processing" ? "warning" :
+                                            order.Status == "Shipped" ? "info" : "primary";
+                                        }
+                                        <span class="badge bg-@statusClass ms-2">@order.Status</span>
+                                    </h5>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        Ordered on @order.OrderDate.ToString("MMMM dd, yyyy")
+                                    </small>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <h4 class="text-primary fw-bold mb-0">$@order.TotalAmount.ToString("N2")</h4>
+                                    <small class="text-muted">@order.TotalItems item(s)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-4">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="order-details">
+                                        <h6 class="fw-bold mb-2">Order Details</h6>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Distributor:</span>
+                                            <span class="detail-value">@(order.DistributorName ?? "N/A")</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Items:</span>
+                                            <span class="detail-value">@order.ItemCount unique items (@order.TotalItems total)</span>
+                                        </div>
+                                        @if (order.EstimatedDeliveryDate.HasValue)
+                                        {
+                                            <div class="detail-item">
+                                                <span class="detail-label">Estimated Delivery:</span>
+                                                <span class="detail-value">@order.EstimatedDeliveryDate.Value.ToString("MMMM dd, yyyy")</span>
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(order.Notes))
+                                        {
+                                            <div class="detail-item">
+                                                <span class="detail-label">Notes:</span>
+                                                <span class="detail-value">@order.Notes</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="order-actions">
+                                        <h6 class="fw-bold mb-2">Order Status</h6>
+                                        <div class="status-timeline">
+                                            <div class="status-item @(order.Status != "Cancelled" ? "completed" : "")">
+                                                <i class="fas fa-check-circle"></i>
+                                                <span>Order Placed</span>
+                                            </div>
+                                            @{
+                                                var processingActive = order.Status == "Processing" || order.Status == "Shipped" || order.Status == "Delivered";
+                                                var processingCompleted = order.Status == "Shipped" || order.Status == "Delivered";
+                                            }
+                                            <div class="status-item @(processingCompleted ? "completed" : processingActive ? "active" : "")">
+                                                <i class="fas fa-cog"></i>
+                                                <span>Processing</span>
+                                            </div>
+                                            @{
+                                                var shippedActive = order.Status == "Shipped";
+                                                var shippedCompleted = order.Status == "Delivered";
+                                            }
+                                            <div class="status-item @(shippedCompleted ? "completed" : shippedActive ? "active" : "")">
+                                                <i class="fas fa-shipping-fast"></i>
+                                                <span>Shipped</span>
+                                            </div>
+                                            <div class="status-item @(order.Status == "Delivered" ? "completed" : "")">
+                                                <i class="fas fa-home"></i>
+                                                <span>Delivered</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-light border-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="order-meta">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Last updated: @order.OrderDate.AddHours(2).ToString("MMM dd, HH:mm")
+                                    </small>
+                                </div>
+                                <div class="order-buttons">
+                                    <button class="btn btn-outline-primary btn-sm me-2" onclick="viewOrderDetails(@order.Id)">
+                                        <i class="fas fa-eye me-1"></i>View Details
+                                    </button>
+                                    @if (order.Status == "Delivered")
+                                    {
+                                        <button class="btn btn-outline-success btn-sm me-2">
+                                            <i class="fas fa-star me-1"></i>Review
+                                        </button>
+                                    }
+                                    @if (order.Status != "Delivered" && order.Status != "Cancelled")
+                                    {
+                                        <button class="btn btn-outline-warning btn-sm me-2" onclick="trackOrder(@order.Id)">
+                                            <i class="fas fa-map-marker-alt me-1"></i>Track
+                                        </button>
+                                    }
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="downloadInvoice(@order.Id)">
+                                        <i class="fas fa-download me-1"></i>Invoice
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.Count > 10)
+        {
+            <div class="d-flex justify-content-center mt-4">
+                <nav aria-label="Orders pagination">
+                    <ul class="pagination">
+                        <li class="page-item">
+                            <a class="page-link" href="#" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    }
+    else
+    {
+        <!-- No Orders State -->
+        <div class="no-orders-container text-center py-5">
+            <div class="no-orders-content">
+                <i class="fas fa-box-open fa-5x text-muted mb-4"></i>
+                <h2 class="fw-bold mb-3">No Orders Yet</h2>
+                <p class="text-muted mb-4 lead">
+                    You haven't placed any orders yet. Start exploring our amazing products!
+                </p>
+
+                <div class="no-orders-actions">
+                    <a href="@Url.Action("Products", "Home")" class="btn btn-primary btn-lg rounded-pill px-5 me-3">
+                        <i class="fas fa-search me-2"></i>Browse Products
+                    </a>
+                    <a href="@Url.Action("Cart", "Home")" class="btn btn-outline-primary btn-lg rounded-pill px-5">
+                        <i class="fas fa-shopping-cart me-2"></i>View Cart
+                    </a>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="quick-links mt-5">
+                    <h5 class="fw-bold mb-3">Popular Categories</h5>
+                    <div class="row g-3 justify-content-center">
+                        <div class="col-md-2">
+                            <a href="@Url.Action("Products", "Home", new { categoryId = 1 })" class="category-quick-link">
+                                <div class="category-card text-center p-3">
+                                    <i class="fas fa-mobile-alt fa-2x text-primary mb-2"></i>
+                                    <div class="fw-bold">Smartphones</div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("Products", "Home", new { categoryId = 2 })" class="category-quick-link">
+                                <div class="category-card text-center p-3">
+                                    <i class="fas fa-laptop fa-2x text-success mb-2"></i>
+                                    <div class="fw-bold">Laptops</div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("Products", "Home", new { categoryId = 3 })" class="category-quick-link">
+                                <div class="category-card text-center p-3">
+                                    <i class="fas fa-tablet-alt fa-2x text-warning mb-2"></i>
+                                    <div class="fw-bold">Tablets</div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-2">
+                            <a href="@Url.Action("Products", "Home", new { categoryId = 4 })" class="category-quick-link">
+                                <div class="category-card text-center p-3">
+                                    <i class="fas fa-headphones fa-2x text-info mb-2"></i>
+                                    <div class="fw-bold">Accessories</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function viewOrderDetails(orderId) {
+            alert(`Viewing details for Order #${orderId}`);
+        }
+
+        function trackOrder(orderId) {
+            alert(`Tracking Order #${orderId}`);
+        }
+
+        function downloadInvoice(orderId) {
+            alert(`Downloading invoice for Order #${orderId}`);
+        }
+
+        // Auto-refresh orders every 30 seconds
+        setInterval(function() {
+            console.log('🔄 Checking for order updates...');
+        }, 30000);
+    </script>
+}

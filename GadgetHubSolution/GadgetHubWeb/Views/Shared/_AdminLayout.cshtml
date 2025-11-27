@@ -1,0 +1,549 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gadget Hub Admin</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/text-visibility.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    @await RenderSectionAsync("Styles", required: false)
+
+    <style>
+        /* 🎨 Enhanced Admin Layout Theme - HIGH CONTRAST VERSION */
+        .dashboard-body.admin-dashboard {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #f1f5f9 100%);
+            min-height: 100vh;
+            color: #1e293b !important;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Enhanced Navigation */
+        .navbar.bg-gradient-admin {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+            box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3);
+            border-bottom: 2px solid #ef4444;
+        }
+
+        .navbar-brand {
+            color: #ffffff !important;
+            font-weight: 900;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .navbar-brand .badge.bg-light {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+            color: #dc2626 !important;
+            font-weight: 700;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            border: 2px solid #ef4444;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .nav-link.dropdown-toggle {
+            color: #ffffff !important;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link.dropdown-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        /* Enhanced Sidebar */
+        .sidebar.admin-sidebar {
+            background: linear-gradient(180deg, #1e293b 0%, #334155 50%, #475569 100%);
+            border-right: 3px solid #dc2626;
+            box-shadow: 4px 0 20px rgba(220, 38, 38, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            z-index: 1000;
+            padding-top: 76px;
+        }
+
+        .sidebar-header {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: #fff;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            padding: 1rem;
+        }
+
+        .sidebar-header::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ef4444 0%, #f87171 50%, #fca5a5 100%);
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .sidebar-item {
+            color: rgba(255, 255, 255, 0.95) !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: block;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(220, 38, 38, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%);
+            transition: width 0.3s ease;
+            z-index: 0;
+        }
+
+        .sidebar-item:hover::before,
+        .sidebar-item.active::before {
+            width: 100%;
+        }
+
+        .sidebar-item:hover {
+            color: #ffffff !important;
+            border-left-color: #dc2626;
+            background: rgba(220, 38, 38, 0.1);
+            transform: translateX(2px);
+            text-decoration: none;
+        }
+
+        .sidebar-item.active {
+            color: #ffffff !important;
+            border-left-color: #dc2626;
+            background: rgba(220, 38, 38, 0.2);
+            font-weight: 700;
+            box-shadow: inset 0 0 10px rgba(220, 38, 38, 0.3);
+        }
+
+        .sidebar-item i {
+            position: relative;
+            z-index: 1;
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-item span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Enhanced Alert Messages */
+        .alert {
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d1e7dd 0%, #a3cfbb 100%);
+            color: #0a3622 !important;
+            border-left-color: #10b981;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da 0%, #f1aeb5 100%);
+            color: #58151c !important;
+            border-left-color: #dc2626;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.2);
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #d1ecf1 0%, #9eeaf9 100%);
+            color: #055160 !important;
+            border-left-color: #06b6d4;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
+        }
+
+        /* Enhanced Main Content */
+        .main-content {
+            background: transparent;
+            border-radius: 20px 0 0 0;
+            position: relative;
+            margin-left: 250px;
+            padding-top: 76px;
+            min-height: 100vh;
+        }
+
+        /* Enhanced Dropdown */
+        .dropdown-menu {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+        }
+
+        .dropdown-item {
+            color: #1e293b !important;
+            font-weight: 500;
+            padding: 0.75rem 1.25rem;
+            transition: all 0.2s ease;
+            border-radius: 0;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #dc2626 !important;
+            transform: translateX(4px);
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .dropdown-divider {
+            border-color: #e2e8f0;
+            margin: 0.5rem 0;
+        }
+
+        /* High Contrast Text Improvements */
+        .admin-dashboard h1,
+        .admin-dashboard h2,
+        .admin-dashboard h3,
+        .admin-dashboard h4,
+        .admin-dashboard h5,
+        .admin-dashboard h6 {
+            color: #1e293b !important;
+        }
+
+        .admin-dashboard p,
+        .admin-dashboard span:not(.badge):not(.status-indicator) {
+            color: #374151 !important;
+        }
+
+        .admin-dashboard .small,
+        .admin-dashboard small {
+            color: #4b5563 !important;
+        }
+
+        .admin-dashboard .text-muted {
+            color: #4b5563 !important;
+        }
+
+        /* Mobile responsive */
+        @@media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1050;
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+                padding-top: 76px;
+            }
+        }
+
+        /* Image loading enhancements */
+        img {
+            transition: opacity 0.3s ease;
+        }
+
+        img.loading {
+            opacity: 0.8;
+        }
+
+        img.loaded {
+            opacity: 1;
+        }
+
+        .image-placeholder {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-placeholder::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 2s infinite;
+        }
+
+        @@keyframes shimmer {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="dashboard-body admin-dashboard">
+    <!-- 🎨 Enhanced Admin Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-gradient-admin fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="@Url.Action("Index", "Home")">
+                <i class="fas fa-rocket me-2"></i>Gadget Hub <span class="badge bg-light text-danger">Admin</span>
+            </a>
+
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button"
+                        data-bs-toggle="dropdown">
+                        <i class="fas fa-user-shield me-1"></i>@User.Identity.Name
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("Index", "Admin")">
+                                <i class="fas fa-tachometer-alt me-2 text-danger"></i>Dashboard
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("Customers", "Admin")">
+                                <i class="fas fa-users me-2 text-primary"></i>Customers
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("Distributors", "Admin")">
+                                <i class="fas fa-building me-2 text-success"></i>Distributors
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("Orders", "Admin")">
+                                <i class="fas fa-shopping-bag me-2 text-info"></i>Orders
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("Quotations", "Admin")">
+                                <i class="fas fa-file-invoice-dollar me-2 text-warning"></i>Quotations
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("Reports", "Admin")">
+                                <i class="fas fa-chart-bar me-2 text-danger"></i>Reports
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("Index", "Home")">
+                                <i class="fas fa-store me-2 text-success"></i>View Website
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <form method="post" action="@Url.Action("Logout", "Auth")" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dropdown-item">
+                                    <i class="fas fa-sign-out-alt me-2 text-danger"></i>Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 🎨 Enhanced Admin Sidebar -->
+    <div class="sidebar admin-sidebar">
+        <div class="sidebar-header">
+            <h5 class="text-white fw-bold">
+                <i class="fas fa-shield-alt me-2"></i>Admin Control Panel
+            </h5>
+            <small class="text-light">System Administrator</small>
+        </div>
+
+        <div class="sidebar-menu">
+            <a href="@Url.Action("Index", "Admin")"
+                class="sidebar-item @(ViewContext.RouteData.Values["Action"].ToString() == "Index" ? "active" : "")">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="@Url.Action("Customers", "Admin")"
+                class="sidebar-item @(ViewContext.RouteData.Values["Action"].ToString() == "Customers" ? "active" : "")">
+                <i class="fas fa-users"></i>
+                <span>Customers</span>
+            </a>
+            <a href="@Url.Action("Distributors", "Admin")"
+                class="sidebar-item @(ViewContext.RouteData.Values["Action"].ToString() == "Distributors" ? "active" : "")">
+                <i class="fas fa-building"></i>
+                <span>Distributors</span>
+            </a>
+            <a href="@Url.Action("Orders", "Admin")"
+                class="sidebar-item @(ViewContext.RouteData.Values["Action"].ToString() == "Orders" ? "active" : "")">
+                <i class="fas fa-shopping-bag"></i>
+                <span>Orders</span>
+            </a>
+            <a href="@Url.Action("Quotations", "Admin")"
+                class="sidebar-item @(ViewContext.RouteData.Values["Action"].ToString() == "Quotations" ? "active" : "")">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Quotations</span>
+            </a>
+            <a href="@Url.Action("Reports", "Admin")"
+                class="sidebar-item @(ViewContext.RouteData.Values["Action"].ToString() == "Reports" ? "active" : "")">
+                <i class="fas fa-chart-bar"></i>
+                <span>Reports</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 🎨 Enhanced Main Content -->
+    <div class="main-content">
+        <div class="container-fluid py-4">
+            @if (TempData["SuccessMessage"] != null)
+            {
+            <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
+                <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+            <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            }
+
+            @if (TempData["InfoMessage"] != null)
+            {
+            <div class="alert alert-info alert-dismissible fade show border-0 shadow-sm" role="alert">
+                <i class="fas fa-info-circle me-2"></i>@TempData["InfoMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            }
+
+            @RenderBody()
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/dashboard.js" asp-append-version="true"></script>
+    <script src="~/js/product-images.js" asp-append-version="true"></script>
+
+    <script>
+        // Enhanced Admin Layout Scripts
+        document.addEventListener('DOMContentLoaded', function () {
+            // Enhanced image loading for admin layout
+            document.querySelectorAll('img').forEach(img => {
+                img.classList.add('loading');
+
+                img.addEventListener('load', function () {
+                    this.classList.remove('loading');
+                    this.classList.add('loaded');
+                });
+
+                img.addEventListener('error', function () {
+                    // Create admin-style placeholder
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'image-placeholder';
+                    placeholder.style.cssText = `
+                        width: ${this.width || '100'}px;
+                        height: ${this.height || '100'}px;
+                        min-height: 60px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-weight: 600;
+                        border-radius: 8px;
+                        font-size: 0.875rem;
+                    `;
+                    placeholder.innerHTML = '<i class="fas fa-image fa-2x"></i>';
+
+                    if (this.parentNode) {
+                        this.parentNode.replaceChild(placeholder, this);
+                    }
+                });
+
+                // Check if image is already loaded
+                if (img.complete) {
+                    if (img.naturalWidth > 0) {
+                        img.classList.remove('loading');
+                        img.classList.add('loaded');
+                    } else {
+                        img.dispatchEvent(new Event('error'));
+                    }
+                }
+            });
+
+            // Enhanced sidebar interactions
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateX(4px)';
+                });
+
+                item.addEventListener('mouseleave', function () {
+                    if (!this.classList.contains('active')) {
+                        this.style.transform = 'translateX(0)';
+                    }
+                });
+            });
+
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(function () {
+                const alerts = document.querySelectorAll('.alert-dismissible');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+
+            console.log('🎨 Enhanced Admin Layout initialized - HIGH CONTRAST Professional theme active');
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

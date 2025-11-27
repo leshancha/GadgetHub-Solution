@@ -1,0 +1,55 @@
+﻿@{
+    ViewData["Title"] = "Access Denied - Gadget Hub";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/text-visibility.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="error-body">
+    <div class="error-container">
+        <div class="container">
+            <div class="row justify-content-center align-items-center min-vh-100">
+                <div class="col-lg-6 text-center">
+                    <div class="error-content">
+                        <div class="error-icon mb-4">
+                            <i class="fas fa-shield-alt fa-5x text-danger"></i>
+                        </div>
+                        <h1 class="display-4 fw-bold text-danger mb-3">403</h1>
+                        <h2 class="fw-bold mb-3">Access Denied</h2>
+                        <p class="lead text-muted mb-4">
+                            Sorry, you don't have permission to access this page.
+                            Please contact your administrator if you believe this is an error.
+                        </p>
+
+                        <div class="error-actions">
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-primary btn-lg rounded-pill px-5 me-3">
+                                <i class="fas fa-home me-2"></i>Go Home
+                            </a>
+                            <a href="@Url.Action("Login", "Auth")" class="btn btn-outline-primary btn-lg rounded-pill px-5">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login
+                            </a>
+                        </div>
+
+                        <div class="mt-4">
+                            <small class="text-muted">
+                                <i class="fas fa-code me-1"></i>Built by <strong>leshancha</strong> | 2025-07-31 11:21:45 UTC
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

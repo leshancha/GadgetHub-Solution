@@ -1,0 +1,162 @@
+@model QuotationResponseDto
+@{
+    ViewData["Title"] = "View Quotation Response";
+    Layout = "_DistributorLayout";
+}
+
+<style>
+    .text-dark-enhanced { color: #212529 !important; font-weight: 500; }
+    .detail-label { color: #495057 !important; font-weight: 600; min-width: 140px; display: inline-block; }
+    .detail-value { color: #212529 !important; font-weight: 500; }
+    .card-body { background-color: #ffffff; }
+    h1, h2, h3, h4, h5, h6 { color: #212529 !important; }
+</style>
+
+<div class="view-response-container">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2 text-dark-enhanced">
+                    <i class="fas fa-eye text-primary me-3"></i>View Quotation Response
+                </h1>
+                <p class="text-muted mb-0">Review your submitted quotation response</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="@Url.Action("QuotationRequests", "Distributor")" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Requests
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Response Details -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-file-invoice-dollar me-2"></i>Response #@Model.Id
+                <span class="badge bg-light text-primary ms-2">@Model.Status</span>
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="fw-bold mb-3 text-dark-enhanced">Response Information</h6>
+                    <div class="detail-item mb-2">
+                        <span class="detail-label">Quotation Request:</span>
+                        <span class="detail-value">#@Model.QuotationRequestId</span>
+                    </div>
+                    <div class="detail-item mb-2">
+                        <span class="detail-label">Total Price:</span>
+                        <span class="detail-value text-success fw-bold">$@Model.TotalPrice.ToString("N2")</span>
+                    </div>
+                    <div class="detail-item mb-2">
+                        <span class="detail-label">Submission Date:</span>
+                        <span class="detail-value">@Model.SubmissionDate.ToString("MMMM dd, yyyy HH:mm")</span>
+                    </div>
+                    <div class="detail-item mb-2">
+                        <span class="detail-label">Average Delivery:</span>
+                        <span class="detail-value">@Model.AverageDeliveryDays days</span>
+                    </div>
+                    <div class="detail-item mb-2">
+                        <span class="detail-label">Items Count:</span>
+                        <span class="detail-value">@Model.ItemCount items</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="fw-bold mb-3 text-dark-enhanced">Response Notes</h6>
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <div class="alert alert-info">
+                            <p class="mb-0">@Model.Notes</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-light">
+                            <p class="mb-0 text-muted">No additional notes provided</p>
+                        </div>
+                    }
+                    
+                    <div class="response-actions mt-3">
+                        <div class="d-grid gap-2">
+                            <a href="@Url.Action("EditQuotationResponse", "Distributor", new { requestId = Model.QuotationRequestId })" 
+                               class="btn btn-warning">
+                                <i class="fas fa-edit me-2"></i>Edit Response
+                            </a>
+                            <a href="@Url.Action("ViewQuotationItems", "Distributor", new { requestId = Model.QuotationRequestId })" 
+                               class="btn btn-outline-primary">
+                                <i class="fas fa-list me-2"></i>View Requested Items
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Response Items -->
+    @if (Model.Items?.Any() == true)
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="mb-0 fw-bold text-dark-enhanced">
+                    <i class="fas fa-list text-secondary me-2"></i>Response Items
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="text-dark-enhanced">Product</th>
+                                <th class="text-dark-enhanced">Quantity</th>
+                                <th class="text-dark-enhanced">Unit Price</th>
+                                <th class="text-dark-enhanced">Total Price</th>
+                                <th class="text-dark-enhanced">Stock</th>
+                                <th class="text-dark-enhanced">Delivery Days</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="@(item.ProductImage ?? "https://via.placeholder.com/50x50?text=IMG")" 
+                                                 alt="@item.ProductName" class="product-thumbnail me-3" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                            <div>
+                                                <h6 class="mb-0 fw-bold text-dark-enhanced">@item.ProductName</h6>
+                                                <small class="text-muted">@item.ProductBrand</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="fw-bold text-dark-enhanced">@item.Quantity</span></td>
+                                    <td><span class="text-success fw-bold">$@item.UnitPrice.ToString("N2")</span></td>
+                                    <td><span class="text-success fw-bold">$@item.TotalPrice.ToString("N2")</span></td>
+                                    <td>
+                                        @{
+                                            var stockClass = item.Stock > 10 ? "success" : item.Stock > 0 ? "warning" : "danger";
+                                            var stockText = item.Stock > 10 ? "In Stock" : item.Stock > 0 ? "Low Stock" : "Out of Stock";
+                                        }
+                                        <span class="badge bg-@stockClass">@item.Stock units</span>
+                                    </td>
+                                    <td><span class="text-info fw-bold">@item.DeliveryDays days</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enhanced visual feedback for better user experience
+            console.log('? Quotation response view loaded');
+        });
+    </script>
+}

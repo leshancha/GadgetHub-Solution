@@ -1,0 +1,379 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#10b981" />
+    <title>@ViewData["Title"] - Gadget Hub</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/text-visibility.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/search.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico">
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-gradient-primary fixed-top">
+            <div class="container">
+                <a class="navbar-brand fw-bold" href="@Url.Action("Index", "Home")">
+                    <i class="fas fa-rocket me-2"></i>Gadget Hub
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Index", "Home")">
+                                <i class="fas fa-home me-1"></i>Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Products", "Home")">
+                                <i class="fas fa-mobile-alt me-1"></i>Products
+                            </a>
+                        </li>
+                        @if (User.IsInRole("Customer"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Orders", "Customer")">
+                                    <i class="fas fa-box me-1"></i>My Orders
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Quotations", "Customer")">
+                                    <i class="fas fa-file-invoice-dollar me-1"></i>Quotations
+                                </a>
+                            </li>
+                        }
+                    </ul>
+
+                    <!-- Search Bar -->
+                    <div class="navbar-search me-3 d-none d-lg-block">
+                        <div class="position-relative">
+                            <input type="text" 
+                                   id="globalSearch" 
+                                   class="form-control" 
+                                   placeholder="Search products..." 
+                                   style="width: 300px; padding-right: 40px;">
+                            <i class="fas fa-search position-absolute top-50 end-0 translate-middle-y me-3 text-muted"></i>
+                            <div id="searchResults" class="position-absolute w-100 bg-white shadow-lg rounded-bottom border d-none" style="top: 100%; z-index: 1050; max-height: 400px; overflow-y: auto;"></div>
+                        </div>
+                    </div>
+
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="@Url.Action("Cart", "Home")">
+                                <i class="fas fa-shopping-cart me-1"></i>Cart
+                                <span class="cart-count badge bg-warning ms-1" id="cartCount">0</span>
+                            </a>
+                        </li>
+
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user me-1"></i>@User.Identity.Name
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    @if (User.IsInRole("Customer"))
+                                    {
+                                        <li><a class="dropdown-item" href="@Url.Action("Index", "Customer")">
+                                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                        </a></li>
+                                    }
+                                    @if (User.IsInRole("Distributor"))
+                                    {
+                                        <li><a class="dropdown-item" href="@Url.Action("Index", "Distributor")">
+                                            <i class="fas fa-warehouse me-2"></i>Distributor Dashboard
+                                        </a></li>
+                                    }
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <li><a class="dropdown-item" href="@Url.Action("Index", "Admin")">
+                                            <i class="fas fa-shield-alt me-2"></i>Admin Dashboard
+                                        </a></li>
+                                    }
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="post" action="@Url.Action("Logout", "Auth")" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Login", "Auth")">
+                                    <i class="fas fa-sign-in-alt me-1"></i>Login
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("RegisterCustomer", "Auth")">
+                                    <i class="fas fa-user-plus me-1"></i>Register
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                    
+                    <!-- Mobile Search -->
+                    <div class="navbar-search d-lg-none w-100 mt-3">
+                        <div class="position-relative">
+                            <input type="text" 
+                                   id="mobileSearch" 
+                                   class="form-control" 
+                                   placeholder="Search products...">
+                            <i class="fas fa-search position-absolute top-50 end-0 translate-middle-y me-3 text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" class="pb-3">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-top: 70px;">
+                <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 70px;">
+                <i class="fas fa-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["InfoMessage"] != null)
+        {
+            <div class="alert alert-info alert-dismissible fade show" role="alert" style="margin-top: 70px;">
+                <i class="fas fa-info-circle me-2"></i>@TempData["InfoMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @RenderBody()
+    </main>
+
+    <footer class="footer bg-light border-top mt-5">
+        <div class="container">
+            <div class="row py-4">
+                <div class="col-md-4">
+                    <h5 class="fw-bold">
+                        <i class="fas fa-rocket me-2"></i>Gadget Hub
+                    </h5>
+                    <p class="text-muted">Your one-stop destination for the latest gadgets and electronics.</p>
+                </div>
+                <div class="col-md-2">
+                    <h6 class="fw-bold">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="@Url.Action("Index", "Home")" class="text-muted">Home</a></li>
+                        <li><a href="@Url.Action("Products", "Home")" class="text-muted">Products</a></li>
+                        <li><a href="#" class="text-muted">About</a></li>
+                        <li><a href="#" class="text-muted">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2">
+                    <h6 class="fw-bold">Support</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-muted">Help Center</a></li>
+                        <li><a href="#" class="text-muted">Returns</a></li>
+                        <li><a href="#" class="text-muted">Shipping</a></li>
+                        <li><a href="@Url.Action("Privacy", "Home")" class="text-muted">Privacy</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="fw-bold">Newsletter</h6>
+                    <p class="text-muted">Subscribe to get updates on new products and offers.</p>
+                    <div class="input-group">
+                        <input type="email" class="form-control" placeholder="Your email">
+                        <button class="btn btn-primary" type="button">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 text-center border-top pt-3">
+                    <p class="text-muted mb-0">
+                        © 2025 Gadget Hub. All rights reserved. Built by leshancha.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/external-image-updater.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        // Global search functionality
+        $(document).ready(function() {
+            let searchTimeout;
+            
+            // Handle both desktop and mobile search
+            $('#globalSearch, #mobileSearch').on('input', function() {
+                const query = $(this).val().trim();
+                
+                // Clear previous timeout
+                clearTimeout(searchTimeout);
+                
+                if (query.length >= 2) {
+                    // Show loading state
+                    showSearchLoading(true);
+                    
+                    // Debounce search requests
+                    searchTimeout = setTimeout(() => {
+                        performSearch(query);
+                    }, 300);
+                } else {
+                    $('#searchResults').addClass('d-none').empty();
+                    showSearchLoading(false);
+                }
+            });
+
+            // Hide search results when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.navbar-search').length) {
+                    $('#searchResults').addClass('d-none');
+                }
+            });
+
+            // Show search results when focusing on search input
+            $('#globalSearch').on('focus', function() {
+                if ($(this).val().trim().length >= 2) {
+                    $('#searchResults').removeClass('d-none');
+                }
+            });
+
+            // Mobile search redirect
+            $('#mobileSearch').on('keypress', function(e) {
+                if (e.which === 13) {
+                    const query = $(this).val().trim();
+                    if (query) {
+                        window.location.href = `/Home/Products?search=${encodeURIComponent(query)}`;
+                    }
+                }
+            });
+        });
+
+        function showSearchLoading(show) {
+            const searchIcon = $('.fa-search');
+            if (show) {
+                searchIcon.removeClass('fa-search').addClass('fa-spinner fa-spin');
+            } else {
+                searchIcon.removeClass('fa-spinner fa-spin').addClass('fa-search');
+            }
+        }
+
+        function performSearch(query) {
+            $.ajax({
+                url: '@Url.Action("Search", "Home")',
+                type: 'GET',
+                data: { q: query },
+                success: function(data) {
+                    displaySearchResults(data);
+                    showSearchLoading(false);
+                },
+                error: function() {
+                    $('#searchResults').addClass('d-none');
+                    showSearchLoading(false);
+                    console.error('Search request failed');
+                }
+            });
+        }
+
+        function displaySearchResults(products) {
+            const resultsContainer = $('#searchResults');
+            
+            if (products.length === 0) {
+                resultsContainer.html(`
+                    <div class="p-3 text-center text-muted">
+                        <i class="fas fa-search mb-2 d-block" style="font-size: 2rem; opacity: 0.3;"></i>
+                        <div>No products found</div>
+                        <small>Try different keywords</small>
+                    </div>
+                `).removeClass('d-none');
+                return;
+            }
+
+            let html = '<div class="p-2">';
+            
+            products.forEach((product, index) => {
+                if (index < 8) { // Limit to 8 results
+                    html += `
+                        <a href="/Home/ProductDetail/${product.id}" class="text-decoration-none">
+                            <div class="search-result-item d-flex align-items-center p-2 rounded hover-bg-light">
+                                <img src="${product.imageUrl || 'https://via.placeholder.com/40x40?text=Product'}" 
+                                     alt="${product.name}" 
+                                     class="me-3 rounded" 
+                                     style="width: 40px; height: 40px; object-fit: cover;"
+                                     onerror="this.src='https://via.placeholder.com/40x40?text=Product'">
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold text-dark">${product.name}</div>
+                                    <small class="text-muted">${product.brand || 'Unknown Brand'}</small>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-primary fw-bold">Request Quote</small>
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                }
+            });
+            
+            html += '</div>';
+            
+            // Add "View All Results" link
+            html += `
+                <div class="border-top p-2 text-center">
+                    <a href="/Home/Products?search=${encodeURIComponent($('#globalSearch').val())}" 
+                       class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-search me-1"></i>View All ${products.length} Results
+                    </a>
+                </div>
+            `;
+            
+            resultsContainer.html(html).removeClass('d-none');
+        }
+
+        // Update cart count (you can enhance this with real-time updates)
+        function updateCartCount() {
+            // This would typically fetch from your cart API
+            // For now, we'll just update the display
+            $('#cartCount').text('0');
+        }
+
+        // Initialize cart count on page load
+        updateCartCount();
+
+        // Enhanced add to cart with animation
+        function animateCartCount() {
+            const cartBadge = $('#cartCount');
+            cartBadge.addClass('updated');
+            setTimeout(() => {
+                cartBadge.removeClass('updated');
+            }, 600);
+        }
+    </script>
+</body>
+
+</html>

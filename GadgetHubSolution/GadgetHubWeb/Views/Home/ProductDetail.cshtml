@@ -1,0 +1,628 @@
+﻿@using GadgetHubWeb.Controllers
+@model GadgetHubWeb.Models.ProductDetailViewModel
+@{
+    ViewData["Title"] = $"{Model.Product.Name} - Gadget Hub";
+    var isAuthenticated = ViewBag.IsAuthenticated as bool? ?? false;
+    var isCustomer = ViewBag.IsCustomer as bool? ?? false;
+}
+
+<div class="product-detail-page">
+    <!-- Breadcrumb -->
+    <div class="container mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+                <li class="breadcrumb-item"><a href="@Url.Action("Products", "Home")">Products</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.Product.Name</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="container">
+        <div class="row g-5">
+            <!-- Product Images -->
+            <div class="col-lg-6">
+                <div class="product-gallery">
+                    <div class="main-image mb-3">
+                        @if (!string.IsNullOrEmpty(Model.Product.ImageUrl))
+                        {
+                            <img src="@Model.Product.ImageUrl"
+                                 alt="@Model.Product.Name" 
+                                 class="img-fluid rounded-3 shadow main-product-image"
+                                 style="width: 100%; height: 400px; object-fit: cover;"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                 onload="this.style.display='block'; this.nextElementSibling.style.display='none';">
+                        }
+                        
+                        <!-- Fallback placeholder for main image -->
+                        <div class="product-detail-placeholder @(!string.IsNullOrEmpty(Model.Product.ImageUrl) ? "d-none" : "d-flex")" 
+                             style="width: 100%; height: 400px; background: var(--gradient-primary); 
+                                    align-items: center; justify-content: center; color: white; border-radius: 12px; box-shadow: var(--shadow);">
+                            <div class="text-center">
+                                <i class="fas fa-mobile-alt fa-5x mb-3"></i>
+                                <h4 class="fw-bold">@Model.Product.Name</h4>
+                                <p class="mb-0">@Model.Product.Brand</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thumbnail Gallery -->
+                    <div class="thumbnail-gallery">
+                        <div class="row g-2">
+                            @for (int i = 1; i <= 4; i++)
+                            {
+                                <div class="col-3">
+                                    @if (!string.IsNullOrEmpty(Model.Product.ImageUrl) && i == 1)
+                                    {
+                                        <img src="@Model.Product.ImageUrl"
+                                             alt="@Model.Product.Name" 
+                                             class="img-fluid rounded thumbnail active"
+                                             style="height: 80px; width: 100%; object-fit: cover; cursor: pointer; border: 2px solid #10b981;"
+                                             onclick="changeMainImage('@Model.Product.ImageUrl')">
+                                    }
+                                    else
+                                    {
+                                        <div class="thumbnail-placeholder" 
+                                             style="height: 80px; width: 100%; background: var(--bg-secondary); 
+                                                    border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border-primary);">
+                                            <i class="fas fa-image text-muted"></i>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Information -->
+            <div class="col-lg-6">
+                <div class="product-info">
+                    <!-- Brand & Category -->
+                    <div class="product-meta mb-3">
+                        @if (!string.IsNullOrEmpty(Model.Product.Brand))
+                        {
+                            <span class="badge bg-primary me-2 fs-6">@Model.Product.Brand</span>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Product.CategoryName))
+                        {
+                            <span class="badge bg-secondary fs-6">@Model.Product.CategoryName</span>
+                        }
+                    </div>
+
+                    <!-- Product Title -->
+                    <h1 class="product-title mb-3 display-6 fw-bold">@Model.Product.Name</h1>
+
+                    <!-- Rating -->
+                    <div class="product-rating mb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="stars me-2">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <i class="fas fa-star @(i <= 4 ? "text-warning" : "text-muted") fs-5"></i>
+                                }
+                            </div>
+                            <span class="rating-text me-2 fs-5 fw-bold">(4.5)</span>
+                            <a href="#reviews" class="text-decoration-none">128 reviews</a>
+                        </div>
+                    </div>
+
+                    <!-- Quotation Info -->
+                    <div class="product-pricing mb-4">
+                        <div class="quotation-request-section">
+                            <div class="alert alert-info border-0 shadow-sm">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-file-invoice-dollar fa-3x text-primary me-3"></i>
+                                    <div>
+                                        <h5 class="alert-heading mb-2">Request Quotation for Best Pricing</h5>
+                                        <p class="mb-1">Add to cart and request quotes from <strong>@(Model.Product.DistributorCount > 0 ? Model.Product.DistributorCount : 3) distributors</strong> to get competitive pricing and delivery terms.</p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-shield-alt me-1"></i>
+                                            No upfront pricing - Compare quotes and choose the best deal
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="product-description mb-4">
+                        <h5 class="fw-bold mb-2">
+                            <i class="fas fa-info-circle text-primary me-2"></i>Description
+                        </h5>
+                        <p class="text-muted">@Model.Product.Description</p>
+                    </div>
+
+                    <!-- Key Specifications -->
+                    <div class="product-specs mb-4">
+                        <h5 class="fw-bold mb-3">
+                            <i class="fas fa-cogs text-secondary me-2"></i>Key Specifications
+                        </h5>
+                        <div class="row g-3">
+                            @if (!string.IsNullOrEmpty(Model.Product.Brand))
+                            {
+                                <div class="col-md-6">
+                                    <div class="spec-card">
+                                        <span class="spec-label">Brand:</span>
+                                        <span class="spec-value fw-bold">@Model.Product.Brand</span>
+                                    </div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Product.Model))
+                            {
+                                <div class="col-md-6">
+                                    <div class="spec-card">
+                                        <span class="spec-label">Model:</span>
+                                        <span class="spec-value fw-bold">@Model.Product.Model</span>
+                                    </div>
+                                </div>
+                            }
+                            <div class="col-md-6">
+                                <div class="spec-card">
+                                    <span class="spec-label">Category:</span>
+                                    <span class="spec-value fw-bold">@Model.Product.CategoryName</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="spec-card">
+                                    <span class="spec-label">Distributors:</span>
+                                    <span class="spec-value fw-bold text-success">@(Model.Product.DistributorCount > 0 ? Model.Product.DistributorCount : 3) available</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quantity Selection -->
+                    <div class="quantity-selection mb-4">
+                        <h6 class="fw-bold mb-2">
+                            <i class="fas fa-calculator text-info me-2"></i>Quantity
+                        </h6>
+                        <div class="quantity-controls">
+                            <div class="input-group" style="max-width: 180px;">
+                                <button class="btn btn-outline-primary" type="button" onclick="changeQuantity(-1)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" class="form-control text-center fw-bold" id="quantity" value="1" min="1" max="100">
+                                <button class="btn btn-outline-primary" type="button" onclick="changeQuantity(1)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="product-actions mb-4">
+                        @if (isAuthenticated && isCustomer)
+                        {
+                            <div class="d-grid gap-3">
+                                <button onclick="addToCart(@Model.Product.Id)" class="btn btn-success btn-lg">
+                                    <i class="fas fa-cart-plus me-2"></i>Add to Cart for Quotation
+                                </button>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <button onclick="requestQuotation(@Model.Product.Id)" class="btn btn-primary w-100">
+                                            <i class="fas fa-file-invoice-dollar me-2"></i>Get Quote
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button class="btn btn-outline-warning w-100">
+                                            <i class="fas fa-heart me-2"></i>Wishlist
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-grid gap-3">
+                                <a href="@Url.Action("Login", "Auth", new { returnUrl = Url.Action("ProductDetail", "Home", new { id = Model.Product.Id }) })"
+                                   class="btn btn-primary btn-lg">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login to Request Quotation
+                                </a>
+                                <div class="alert alert-info mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Login required</strong> to add items to cart and request quotations from distributors.
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Trust Badges -->
+                    <div class="trust-section">
+                        <div class="row g-3 text-center">
+                            <div class="col-4">
+                                <div class="trust-item p-3 bg-light rounded">
+                                    <i class="fas fa-shipping-fast text-primary fa-2x mb-2"></i>
+                                    <small class="d-block fw-bold">Fast Delivery</small>
+                                    <small class="text-muted">Multiple Options</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="trust-item p-3 bg-light rounded">
+                                    <i class="fas fa-shield-alt text-success fa-2x mb-2"></i>
+                                    <small class="d-block fw-bold">Secure Platform</small>
+                                    <small class="text-muted">Verified Distributors</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="trust-item p-3 bg-light rounded">
+                                    <i class="fas fa-medal text-warning fa-2x mb-2"></i>
+                                    <small class="d-block fw-bold">Best Prices</small>
+                                    <small class="text-muted">Compare Quotes</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products Section -->
+        @if (Model.RelatedProducts.Any())
+        {
+            <div class="row mt-5">
+                <div class="col-12">
+                    <h4 class="fw-bold mb-4">
+                        <i class="fas fa-star text-warning me-2"></i>Related Products
+                    </h4>
+                    <div class="row g-4">
+                        @foreach (var relatedProduct in Model.RelatedProducts.Take(4))
+                        {
+                            <div class="col-lg-3 col-md-6">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="position-relative overflow-hidden">
+                                        @if (!string.IsNullOrEmpty(relatedProduct.ImageUrl))
+                                        {
+                                            <img src="@relatedProduct.ImageUrl" 
+                                                 class="card-img-top" alt="@relatedProduct.Name" 
+                                                 style="height: 200px; object-fit: cover;"
+                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        }
+                                        <div class="@(!string.IsNullOrEmpty(relatedProduct.ImageUrl) ? "d-none" : "d-flex")"
+                                             style="height: 200px; background: var(--gradient-primary); 
+                                                    align-items: center; justify-content: center; color: white;">
+                                            <div class="text-center">
+                                                <i class="fas fa-mobile-alt fa-2x mb-2"></i>
+                                                <div class="fw-bold">@relatedProduct.Name</div>
+                                            </div>
+                                        </div>
+                                        
+                                        @if (!string.IsNullOrEmpty(relatedProduct.Brand))
+                                        {
+                                            <span class="position-absolute top-0 start-0 badge bg-primary m-2">@relatedProduct.Brand</span>
+                                        }
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="card-title fw-bold">@relatedProduct.Name</h6>
+                                        <p class="text-muted small mb-3">@relatedProduct.Brand</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-primary fw-bold">
+                                                <i class="fas fa-file-invoice-dollar me-1"></i>Request Quote
+                                            </span>
+                                            <a href="@Url.Action("ProductDetail", "Home", new { id = relatedProduct.Id })" 
+                                               class="btn btn-sm btn-outline-primary rounded-pill">
+                                                <i class="fas fa-eye me-1"></i>View
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Product Tabs -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="product-tabs">
+                    <ul class="nav nav-tabs nav-fill" id="productTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">
+                                <i class="fas fa-info-circle me-2"></i>Description
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="specifications-tab" data-bs-toggle="tab" data-bs-target="#specifications" type="button" role="tab">
+                                <i class="fas fa-cogs me-2"></i>Specifications
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">
+                                <i class="fas fa-star me-2"></i>Reviews (128)
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content border border-top-0" id="productTabContent">
+                        <div class="tab-pane fade show active" id="description" role="tabpanel">
+                            <div class="p-4">
+                                <h5 class="fw-bold mb-3">Product Description</h5>
+                                <p class="mb-4">@Model.Product.Description</p>
+                                <p>Experience cutting-edge technology with this premium device. Designed for users who demand the best in performance, reliability, and style.</p>
+
+                                <h6 class="fw-bold mt-4 mb-2">Key Features:</h6>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Premium build quality with attention to detail</li>
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Latest technology for optimal performance</li>
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>User-friendly interface and seamless operation</li>
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Comprehensive warranty and support</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="specifications" role="tabpanel">
+                            <div class="p-4">
+                                <h5 class="fw-bold mb-3">Technical Specifications</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>Brand</strong></td>
+                                                <td>@Model.Product.Brand</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Model</strong></td>
+                                                <td>@Model.Product.Model</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Category</strong></td>
+                                                <td>@Model.Product.CategoryName</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Distributors Available</strong></td>
+                                                <td>@(Model.Product.DistributorCount > 0 ? Model.Product.DistributorCount : 3) distributors ready to quote</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Warranty</strong></td>
+                                                <td>1 Year International Warranty</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Shipping</strong></td>
+                                                <td>Free shipping available (depends on distributor)</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="reviews" role="tabpanel">
+                            <div class="p-4">
+                                <h5 class="fw-bold mb-3">Customer Reviews</h5>
+
+                                <!-- Review Summary -->
+                                <div class="review-summary mb-4 p-4 bg-light rounded">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-3 text-center">
+                                            <div class="overall-rating">
+                                                <span class="rating-number display-4 fw-bold text-warning">4.5</span>
+                                                <div class="stars mb-2">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        <i class="fas fa-star @(i <= 4 ? "text-warning" : "text-muted") fs-5"></i>
+                                                    }
+                                                </div>
+                                                <small class="text-muted">Based on 128 reviews</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="rating-breakdown">
+                                                @for (int i = 5; i >= 1; i--)
+                                                {
+                                                    <div class="rating-row d-flex align-items-center mb-2">
+                                                        <span class="rating-label me-2">@i★</span>
+                                                        <div class="progress flex-fill mx-2" style="height: 8px;">
+                                                            @{
+                                                                var progressWidth = i == 5 ? "60%" : i == 4 ? "25%" : i == 3 ? "10%" : i == 2 ? "3%" : "2%";
+                                                            }
+                                                            <div class="progress-bar bg-warning" style="width: @progressWidth"></div>
+                                                        </div>
+                                                        @{
+                                                            var count = i == 5 ? "77" : i == 4 ? "32" : i == 3 ? "13" : i == 2 ? "4" : "2";
+                                                        }
+                                                        <span class="rating-count">@count</span>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Individual Reviews -->
+                                <div class="reviews-list">
+                                    <div class="review-item mb-4 pb-4 border-bottom">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="review-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-0">John Customer</h6>
+                                                <small class="text-muted">Verified Purchase • 2 days ago</small>
+                                            </div>
+                                            <div class="ms-auto">
+                                                <div class="stars">
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        <i class="fas fa-star text-warning"></i>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p class="mb-3">Excellent product! Exactly as described and works perfectly. The quotation system made it easy to get the best price from multiple distributors. Fast delivery and great customer service. Highly recommended!</p>
+                                        <div class="review-actions">
+                                            <button class="btn btn-sm btn-outline-primary me-2">
+                                                <i class="fas fa-thumbs-up me-1"></i>Helpful (12)
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-flag me-1"></i>Report
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="review-item mb-4 pb-4 border-bottom">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="review-avatar bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-0">Sarah Johnson</h6>
+                                                <small class="text-muted">Verified Purchase • 1 week ago</small>
+                                            </div>
+                                            <div class="ms-auto">
+                                                <div class="stars">
+                                                    @for (int i = 1; i <= 4; i++)
+                                                    {
+                                                        <i class="fas fa-star text-warning"></i>
+                                                    }
+                                                    <i class="fas fa-star text-muted"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p class="mb-3">Good quality product, works as expected. The quotation comparison feature saved me a lot of money! The only minor issue is the packaging could be better, but overall satisfied with the purchase.</p>
+                                        <div class="review-actions">
+                                            <button class="btn btn-sm btn-outline-primary me-2">
+                                                <i class="fas fa-thumbs-up me-1"></i>Helpful (8)
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-flag me-1"></i>Report
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Write Review Button -->
+                                @if (isAuthenticated && isCustomer)
+                                {
+                                    <div class="text-center">
+                                        <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#reviewModal">
+                                            <i class="fas fa-star me-2"></i>Write a Review
+                                        </button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-center">
+                                        <p class="text-muted mb-3">Login to write a review</p>
+                                        <a href="@Url.Action("Login", "Auth")" class="btn btn-outline-primary rounded-pill px-4">
+                                            <i class="fas fa-sign-in-alt me-2"></i>Login to Review
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function changeQuantity(change) {
+            const quantityInput = document.getElementById('quantity');
+            let currentValue = parseInt(quantityInput.value);
+            let newValue = currentValue + change;
+
+            if (newValue >= 1 && newValue <= 100) {
+                quantityInput.value = newValue;
+            }
+        }
+
+        function changeMainImage(imageSrc) {
+            const mainImage = document.querySelector('.main-product-image');
+            if (mainImage && imageSrc) {
+                mainImage.src = imageSrc;
+                
+                // Update active thumbnail
+                document.querySelectorAll('.thumbnail').forEach(thumb => {
+                    thumb.classList.remove('active');
+                    thumb.style.border = '2px solid var(--border-primary)';
+                });
+                event.target.classList.add('active');
+                event.target.style.border = '2px solid var(--primary-color)';
+            }
+        }
+
+        function addToCart(productId) {
+            const quantity = parseInt(document.getElementById('quantity').value);
+
+            // Show loading state
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Adding to Cart...';
+            btn.disabled = true;
+
+            // Submit form via fetch
+            fetch('@Url.Action("AddToCart", "Home")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': '@Html.AntiForgeryToken().ToString()'
+                },
+                body: `productId=${productId}&quantity=${quantity}`
+            })
+            .then(response => {
+                if (response.ok) {
+                    btn.innerHTML = '<i class="fas fa-check me-2"></i>Added to Cart!';
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-primary');
+                    
+                    // Show success message
+                    showNotification('Product added to cart! Go to cart to request quotations.', 'success');
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.classList.remove('btn-primary');
+                        btn.classList.add('btn-success');
+                        btn.disabled = false;
+                    }, 3000);
+                } else {
+                    throw new Error('Failed to add to cart');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Error';
+                btn.classList.add('btn-danger');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('btn-danger');
+                    btn.disabled = false;
+                }, 3000);
+            });
+        }
+
+        function requestQuotation(productId) {
+            if (confirm('This will add the item to your cart and redirect to quotation request. Continue?')) {
+                addToCart(productId);
+                setTimeout(() => {
+                    window.location.href = '@Url.Action("Cart", "Home")';
+                }, 2000);
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 100px; right: 20px; z-index: 1050; max-width: 400px;';
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    </script>
+}

@@ -1,0 +1,309 @@
+@model AdminOrdersViewModel
+@{
+    ViewData["Title"] = "Order Management - Admin";
+    Layout = "_AdminLayout";
+    var totalOrders = ViewBag.TotalOrders as int? ?? 0;
+    var pendingOrders = ViewBag.PendingOrders as int? ?? 0;
+    var processingOrders = ViewBag.ProcessingOrders as int? ?? 0;
+    var completedOrders = ViewBag.CompletedOrders as int? ?? 0;
+    var totalRevenue = ViewBag.TotalRevenue as decimal? ?? 0;
+}
+
+<div class="admin-orders-container">
+    <!-- Header -->
+    <div class="dashboard-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2">
+                    <i class="fas fa-shopping-bag text-info me-3"></i>Order Management
+                </h1>
+                <p class="text-muted mb-0">Monitor and manage all customer orders</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <button class="btn btn-success me-2" onclick="exportOrders()">
+                    <i class="fas fa-download me-1"></i>Export Orders
+                </button>
+                <button class="btn btn-primary" onclick="location.reload()">
+                    <i class="fas fa-sync me-1"></i>Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card bg-info">
+                <div class="stats-content">
+                    <div class="stats-icon">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number">@totalOrders</h3>
+                        <p class="stats-label">Total Orders</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card bg-warning">
+                <div class="stats-content">
+                    <div class="stats-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number">@pendingOrders</h3>
+                        <p class="stats-label">Pending Orders</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card bg-primary">
+                <div class="stats-content">
+                    <div class="stats-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number">@processingOrders</h3>
+                        <p class="stats-label">Processing</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card bg-success">
+                <div class="stats-content">
+                    <div class="stats-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number">@completedOrders</h3>
+                        <p class="stats-label">Completed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-gradient-success text-white">
+                <div class="card-body text-center py-4">
+                    <h2 class="display-5 fw-bold mb-2">$@totalRevenue.ToString("N2")</h2>
+                    <p class="mb-0">Total Revenue from All Orders</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-list me-2"></i>Order History
+                    </h5>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control" id="orderSearch" placeholder="Search orders...">
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Processing">Processing</option>
+                            <option value="Shipped">Shipped</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Orders.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Distributor</th>
+                                <th>Amount</th>
+                                <th>Items</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model.Orders.OrderByDescending(o => o.OrderDate))
+                            {
+                                <tr class="order-row" data-order-id="@order.Id" data-status="@order.Status">
+                                    <td class="fw-bold text-primary">#@order.Id</td>
+                                    <td>
+                                        <div>
+                                            <div class="fw-bold">@order.CustomerName</div>
+                                            <small class="text-muted">@order.CustomerEmail</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <div class="fw-bold">@order.DistributorName</div>
+                                            <small class="text-muted">Partner</small>
+                                        </div>
+                                    </td>
+                                    <td class="fw-bold text-success">$@order.TotalAmount.ToString("N2")</td>
+                                    <td>
+                                        <span class="badge bg-light text-dark">
+                                            @order.ItemCount items (@order.TotalItems total)
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-@(GetStatusBadgeColor(order.Status)) rounded-pill">
+                                            <i class="fas fa-@(GetStatusIcon(order.Status)) me-1"></i>
+                                            @order.Status
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <div class="fw-bold">@order.OrderDate.ToString("MMM dd, yyyy")</div>
+                                            <small class="text-muted">@order.OrderDate.ToString("HH:mm")</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    onclick="viewOrder(@order.Id)">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-info" 
+                                                    onclick="trackOrder(@order.Id)">
+                                                <i class="fas fa-map-marker-alt"></i>
+                                            </button>
+                                            @if (order.Status == "Pending" || order.Status == "Processing")
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-success" 
+                                                        onclick="updateOrderStatus(@order.Id, 'Processing')">
+                                                    <i class="fas fa-play"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-shopping-bag fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted">No orders found</h5>
+                    <p class="text-muted">No orders have been placed yet.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetStatusBadgeColor(string status)
+    {
+        return status switch
+        {
+            "Pending" => "warning",
+            "Processing" => "primary",
+            "Shipped" => "info",
+            "Delivered" => "success",
+            "Cancelled" => "danger",
+            _ => "secondary"
+        };
+    }
+
+    private string GetStatusIcon(string status)
+    {
+        return status switch
+        {
+            "Pending" => "clock",
+            "Processing" => "cog",
+            "Shipped" => "truck",
+            "Delivered" => "check",
+            "Cancelled" => "times",
+            _ => "question"
+        };
+    }
+}
+
+@section Scripts {
+    <script>
+        // Search and filter functionality
+        document.getElementById('orderSearch').addEventListener('input', filterOrders);
+        document.getElementById('statusFilter').addEventListener('change', filterOrders);
+
+        function filterOrders() {
+            const searchTerm = document.getElementById('orderSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const rows = document.querySelectorAll('.order-row');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const status = row.getAttribute('data-status');
+                
+                const matchesSearch = text.includes(searchTerm);
+                const matchesStatus = !statusFilter || status === statusFilter;
+                
+                row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+            });
+        }
+
+        function viewOrder(orderId) {
+            // Redirect to order details page
+            window.open(`/Admin/OrderDetails/${orderId}`, '_blank');
+        }
+
+        function trackOrder(orderId) {
+            alert(`Order tracking for #${orderId}: Status tracking feature coming soon!`);
+        }
+
+        function updateOrderStatus(orderId, newStatus) {
+            if (confirm(`Update order #${orderId} status to ${newStatus}?`)) {
+                // Send update request
+                fetch(`/api/admin/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Failed to update order status');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error updating order status');
+                });
+            }
+        }
+
+        function exportOrders() {
+            window.open('/api/admin/export/orders', '_blank');
+        }
+    </script>
+}

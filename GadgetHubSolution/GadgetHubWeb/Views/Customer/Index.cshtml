@@ -1,0 +1,377 @@
+﻿@using GadgetHubWeb.Models
+@model GadgetHubWeb.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Customer Dashboard - Gadget Hub";
+    Layout = "_CustomerLayout";
+    var totalOrders = ViewBag.TotalOrders as int? ?? 0;
+    var totalSpent = ViewBag.TotalSpent as decimal? ?? 0;
+    var pendingQuotations = ViewBag.PendingQuotations as int? ?? 0;
+    var activeQuotations = ViewBag.ActiveQuotations as int? ?? 0;
+}
+
+<div class="dashboard-container">
+    <!-- 🎨 Clean Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2 text-primary">
+                    <i class="fas fa-tachometer-alt me-3"></i>Customer Dashboard
+                </h1>
+                <p class="text-muted mb-0 fs-5">Welcome back, <strong class="text-primary">@Model.UserName</strong>! Here's your account overview.</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="dashboard-time">
+                    <div class="badge bg-primary bg-opacity-10 text-primary mb-2">
+                        <i class="fas fa-clock me-1"></i>
+                        Last updated: @DateTime.UtcNow.ToString("MMM dd, yyyy HH:mm UTC")
+                    </div>
+                    <br>
+                    <div class="badge bg-success bg-opacity-10 text-success">
+                        <i class="fas fa-user me-1"></i>
+                        Account: <strong>@Model.UserName</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎨 Clean Stats Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card bg-primary">
+                <div class="stats-content">
+                    <div class="stats-icon bg-primary">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number text-white">@totalOrders</h3>
+                        <p class="stats-label text-white">Total Orders</p>
+                    </div>
+                </div>
+                <div class="stats-footer">
+                    <a href="@Url.Action("Orders", "Customer")" class="text-white">
+                        <i class="fas fa-arrow-right me-1"></i>View Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card bg-success">
+                <div class="stats-content">
+                    <div class="stats-icon bg-success">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number text-white">$@totalSpent.ToString("N0")</h3>
+                        <p class="stats-label text-white">Total Spent</p>
+                    </div>
+                </div>
+                <div class="stats-footer">
+                    <span class="text-white">
+                        <i class="fas fa-chart-line me-1"></i>Lifetime Value
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card bg-warning">
+                <div class="stats-content">
+                    <div class="stats-icon bg-warning">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number text-white">@pendingQuotations</h3>
+                        <p class="stats-label text-white">Pending Quotations</p>
+                    </div>
+                </div>
+                <div class="stats-footer">
+                    <a href="@Url.Action("Quotations", "Customer")" class="text-white">
+                        <i class="fas fa-arrow-right me-1"></i>View Quotations
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="stats-card bg-info">
+                <div class="stats-content">
+                    <div class="stats-icon bg-info">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number text-white">@activeQuotations</h3>
+                        <p class="stats-label text-white">Active Quotes</p>
+                    </div>
+                </div>
+                <div class="stats-footer">
+                    <span class="text-white">
+                        <i class="fas fa-eye me-1"></i>Ready to Compare
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎨 Quick Actions Section -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold text-primary">
+                        <i class="fas fa-bolt text-warning me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-lg-3 col-md-6">
+                            <a href="@Url.Action("Products", "Home")" class="quick-action-card text-decoration-none">
+                                <div class="text-center">
+                                    <div class="quick-action-icon bg-primary text-white">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-2">Browse Products</h6>
+                                    <p class="text-muted small mb-0">Explore our premium gadget collection</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6">
+                            <a href="@Url.Action("Cart", "Home")" class="quick-action-card text-decoration-none">
+                                <div class="text-center">
+                                    <div class="quick-action-icon bg-success text-white">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-2">View Cart</h6>
+                                    <p class="text-muted small mb-0">Check items in your shopping cart</p>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6">
+                            <div class="quick-action-card text-center" onclick="requestQuotation()">
+                                <div class="quick-action-icon bg-warning text-white">
+                                    <i class="fas fa-file-invoice-dollar"></i>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-2">Request Quotation</h6>
+                                <p class="text-muted small mb-0">Get competitive quotes from distributors</p>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6">
+                            <a href="@Url.Action("CompareQuotations", "Customer")" class="quick-action-card text-decoration-none">
+                                <div class="text-center">
+                                    <div class="quick-action-icon bg-info text-white">
+                                        <i class="fas fa-balance-scale"></i>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-2">Compare Quotes</h6>
+                                    <p class="text-muted small mb-0">Compare prices and choose the best deal</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎨 Recent Activity Section -->
+    <div class="row g-4">
+        <!-- Recent Orders -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold text-primary">
+                            <i class="fas fa-box me-2"></i>Recent Orders
+                        </h5>
+                        <a href="@Url.Action("Orders", "Customer")" class="btn btn-sm btn-outline-primary rounded-pill">
+                            <i class="fas fa-eye me-1"></i>View All
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentOrders != null && Model.RecentOrders.Any())
+                    {
+                        <div class="activity-list">
+                            @foreach (var order in Model.RecentOrders.Take(3))
+                            {
+                                <div class="activity-item">
+                                    <div class="activity-icon bg-@(order.Status == "Delivered" ? "success" : order.Status == "Processing" ? "warning" : "primary")">
+                                        <i class="fas fa-@(order.Status == "Delivered" ? "check" : order.Status == "Processing" ? "clock" : "box")"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <h6 class="mb-1 fw-bold text-dark">Order #@order.Id</h6>
+                                        <p class="mb-1 text-muted small">
+                                            @order.ItemCount items • @order.OrderDate.ToString("MMM dd, yyyy")
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-@(order.Status == "Delivered" ? "success" : order.Status == "Processing" ? "warning" : "primary") rounded-pill">
+                                                @order.Status
+                                            </span>
+                                            <div class="fw-bold text-primary">$@order.TotalAmount.ToString("N2")</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No orders yet</h6>
+                            <p class="text-muted small">Start shopping to see your orders here</p>
+                            <a href="@Url.Action("Products", "Home")" class="btn btn-primary rounded-pill">
+                                <i class="fas fa-search me-1"></i>Browse Products
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Quotations -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold text-success">
+                            <i class="fas fa-file-invoice-dollar me-2"></i>Recent Quotations
+                        </h5>
+                        <a href="@Url.Action("Quotations", "Customer")" class="btn btn-sm btn-outline-success rounded-pill">
+                            <i class="fas fa-eye me-1"></i>View All
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentQuotations != null && Model.RecentQuotations.Any())
+                    {
+                        <div class="activity-list">
+                            @foreach (var quotation in Model.RecentQuotations.Take(3))
+                            {
+                                <div class="activity-item">
+                                    <div class="activity-icon bg-@(quotation.HasResponses ? "success" : "warning")">
+                                        <i class="fas fa-@(quotation.HasResponses ? "handshake" : "clock")"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <h6 class="mb-1 fw-bold text-dark">Quotation #@quotation.Id</h6>
+                                        <p class="mb-1 text-muted small">
+                                            @quotation.ItemCount items • @quotation.RequestDate.ToString("MMM dd, yyyy")
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-@(quotation.HasResponses ? "success" : "warning") rounded-pill">
+                                                @(quotation.HasResponses ? $"{quotation.ResponseCount} Responses" : "Pending")
+                                            </span>
+                                            @if (quotation.HasResponses)
+                                            {
+                                                <a href="@Url.Action("CompareQuotations", "Customer", new { requestId = quotation.Id })"
+                                                   class="btn btn-sm btn-success rounded-pill">
+                                                    <i class="fas fa-eye me-1"></i>Compare
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <small class="text-muted">Waiting for quotes</small>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-file-invoice fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No quotations yet</h6>
+                            <p class="text-muted small">Add items to cart and request quotations</p>
+                            <button class="btn btn-success rounded-pill" onclick="requestQuotation()">
+                                <i class="fas fa-plus me-1"></i>Request Quote
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function requestQuotation() {
+            // Check if cart has items first
+            fetch('@Url.Action("Cart", "Customer")')
+                .then(response => response.text())
+                .then(html => {
+                    // Simple check if cart is empty by looking for "empty" text
+                    if (html.includes('cart is empty') || html.includes('no items')) {
+                        showNotification('❌ Your cart is empty. Add products before requesting a quotation.', 'warning');
+                        setTimeout(() => {
+                            window.location.href = '@Url.Action("Products", "Home")';
+                        }, 2000);
+                        return;
+                    }
+                    
+                    // If cart has items, redirect to quotation request page
+                    if (confirm('This will create a quotation request from your current cart items. Continue?')) {
+                        window.location.href = '@Url.Action("RequestQuotation", "Customer")';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Fallback - redirect to cart
+                    window.location.href = '@Url.Action("Cart", "Home")';
+                });
+        }
+
+        function showNotification(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = `
+                top: 100px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            `;
+            toast.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto-remove after 4 seconds
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 4000);
+        }
+
+        // Auto-refresh dashboard data every 5 minutes
+        setInterval(function() {
+            location.reload();
+        }, 300000);
+
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Console message
+        console.log(`
+🎨 GADGET HUB CUSTOMER DASHBOARD
+===============================
+User: @Model.UserName
+Orders: @totalOrders
+Spent: $@totalSpent.ToString("N2")
+Quotations: @pendingQuotations pending
+===============================
+Clean theme activated! 🚀
+        `);
+    </script>
+}

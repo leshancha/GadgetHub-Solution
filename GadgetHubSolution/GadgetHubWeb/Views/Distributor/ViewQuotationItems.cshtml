@@ -1,0 +1,231 @@
+@model List<QuotationRequestItemDto>
+@{
+    ViewData["Title"] = "View Quotation Items";
+    Layout = "_DistributorLayout";
+    var requestId = ViewBag.RequestId as int? ?? 0;
+}
+
+<style>
+    .text-dark-enhanced { color: #212529 !important; font-weight: 500; }
+    .detail-label { color: #495057 !important; font-weight: 600; min-width: 140px; display: inline-block; }
+    .detail-value { color: #212529 !important; font-weight: 500; }
+    .card-body { background-color: #ffffff; }
+    h1, h2, h3, h4, h5, h6 { color: #212529 !important; }
+</style>
+
+<div class="view-items-container">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2 text-dark-enhanced">
+                    <i class="fas fa-list text-info me-3"></i>Quotation Request Items
+                </h1>
+                <p class="text-muted mb-0">Review items requested by customer for Request #@requestId</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="@Url.Action("QuotationRequests", "Distributor")" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Requests
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <!-- Items Summary -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-info text-white py-3">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-shopping-list me-2"></i>Request Summary
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="summary-stat">
+                            <h3 class="text-primary fw-bold">@Model.Count</h3>
+                            <p class="text-muted mb-0">Unique Products</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="summary-stat">
+                            <h3 class="text-success fw-bold">@Model.Sum(i => i.Quantity)</h3>
+                            <p class="text-muted mb-0">Total Quantity</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="summary-stat">
+                            <h3 class="text-warning fw-bold">@Model.Count(i => !string.IsNullOrEmpty(i.Specifications))</h3>
+                            <p class="text-muted mb-0">With Specifications</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="summary-stat">
+                            <h3 class="text-info fw-bold">@Model.Select(i => i.ProductCategory).Distinct().Count()</h3>
+                            <p class="text-muted mb-0">Categories</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items List -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="mb-0 fw-bold text-dark-enhanced">
+                    <i class="fas fa-boxes text-secondary me-2"></i>Requested Items Details
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="text-dark-enhanced">Product</th>
+                                <th class="text-dark-enhanced">Category</th>
+                                <th class="text-dark-enhanced">Quantity</th>
+                                <th class="text-dark-enhanced">Specifications</th>
+                                <th class="text-dark-enhanced">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="@(item.ProductImage ?? "https://via.placeholder.com/60x60?text=IMG")" 
+                                                 alt="@item.ProductName" class="product-thumbnail me-3" 
+                                                 style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #dee2e6;">
+                                            <div>
+                                                <h6 class="mb-1 fw-bold text-dark-enhanced">@item.ProductName</h6>
+                                                <small class="text-muted">@item.ProductBrand</small>
+                                                <br>
+                                                <small class="text-primary">Product ID: @item.ProductId</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">@item.ProductCategory</span>
+                                    </td>
+                                    <td>
+                                        <div class="quantity-display">
+                                            <span class="badge bg-primary fs-6">@item.Quantity units</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.Specifications))
+                                        {
+                                            <div class="specifications-box">
+                                                <div class="alert alert-light mb-0 p-2">
+                                                    <small class="text-dark-enhanced">@item.Specifications</small>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-muted">No specific requirements</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="item-actions">
+                                            <button class="btn btn-outline-success btn-sm" onclick="checkInventory(@item.ProductId)" 
+                                                    data-bs-toggle="tooltip" title="Check your inventory for this product">
+                                                <i class="fas fa-warehouse"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm ms-1" onclick="viewProductDetails(@item.ProductId)" 
+                                                    data-bs-toggle="tooltip" title="View product details">
+                                                <i class="fas fa-info-circle"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-section mt-4">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="alert alert-info">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <strong>Tip:</strong> Review each item carefully and check your inventory to provide accurate pricing and delivery times.
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-grid gap-2">
+                        <a href="@Url.Action("QuotationRequests", "Distributor")#request_@requestId" class="btn btn-warning btn-lg">
+                            <i class="fas fa-plus me-2"></i>Create Response
+                        </a>
+                        <a href="@Url.Action("Inventory", "Distributor")" class="btn btn-outline-primary">
+                            <i class="fas fa-boxes me-2"></i>Check Inventory
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- No Items State -->
+        <div class="no-items-container text-center py-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <i class="fas fa-box-open fa-5x text-muted mb-4"></i>
+                    <h3 class="fw-bold mb-3 text-dark-enhanced">No Items Found</h3>
+                    <p class="text-muted mb-4">
+                        No items were found for this quotation request. This might be due to:
+                    </p>
+                    <ul class="list-unstyled text-muted">
+                        <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>The request might have been cancelled</li>
+                        <li><i class="fas fa-sync-alt text-info me-2"></i>Data is still loading</li>
+                        <li><i class="fas fa-bug text-danger me-2"></i>A technical issue occurred</li>
+                    </ul>
+                    <div class="mt-4">
+                        <a href="@Url.Action("QuotationRequests", "Distributor")" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Requests
+                        </a>
+                        <button onclick="location.reload()" class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-redo me-2"></i>Reload
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function checkInventory(productId) {
+            // Navigate to inventory page with focus on specific product
+            window.location.href = `@Url.Action("Inventory", "Distributor")?productId=${productId}`;
+        }
+
+        function viewProductDetails(productId) {
+            // Open product details in new tab
+            window.open(`@Url.Action("ProductDetail", "Home")?id=${productId}`, '_blank');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Enhanced visual feedback
+            console.log('? Quotation items view loaded with @Model.Count items');
+            
+            // Highlight products with specifications
+            document.querySelectorAll('.specifications-box').forEach(box => {
+                box.style.borderLeft = '4px solid #0d6efd';
+            });
+        });
+    </script>
+}

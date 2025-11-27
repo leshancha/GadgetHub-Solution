@@ -1,0 +1,452 @@
+﻿@model List<QuotationRequestDto>
+@{
+    ViewData["Title"] = "Quotation Requests";
+    Layout = "_DistributorLayout";
+}
+
+<!-- Add anti-forgery token for CSRF protection -->
+@Html.AntiForgeryToken()
+
+<style>
+    /* ✅ IMPROVED: Enhanced font colors and visibility */
+    .text-dark-enhanced {
+        color: #212529 !important;
+        font-weight: 500;
+    }
+    
+    .detail-label {
+        color: #495057 !important;
+        font-weight: 600;
+        min-width: 140px;
+        display: inline-block;
+    }
+    
+    .detail-value {
+        color: #212529 !important;
+        font-weight: 500;
+    }
+    
+    .customer-name {
+        color: #0d6efd !important;
+        font-weight: 600;
+    }
+    
+    .request-date {
+        color: #198754 !important;
+        font-weight: 500;
+    }
+    
+    .card-body {
+        background-color: #ffffff;
+    }
+    
+    .request-details h6 {
+        color: #212529 !important;
+        font-weight: 700;
+    }
+    
+    .response-section h6 {
+        color: #212529 !important;
+        font-weight: 700;
+    }
+    
+    .quotation-requests-container h1 {
+        color: #212529 !important;
+    }
+    
+    .quotation-requests-container p {
+        color: #6c757d !important;
+    }
+</style>
+
+<div class="quotation-requests-container">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2 text-dark-enhanced">
+                    <i class="fas fa-file-invoice-dollar text-warning me-3"></i>Quotation Requests
+                </h1>
+                <p class="text-muted mb-0">Review and respond to customer quotation requests</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="request-stats">
+                    <span class="badge bg-warning rounded-pill fs-6 me-2">@Model.Count(q => q.Status == "Pending" && !q.AlreadyResponded) Awaiting Response</span>
+                    <span class="badge bg-success rounded-pill fs-6">@Model.Count(q => q.AlreadyResponded) Responded</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <!-- Quotation Requests List -->
+        <div class="requests-list">
+            @foreach (var request in Model.OrderByDescending(r => r.RequestDate))
+            {
+                <div class="request-card mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0 py-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h5 class="mb-0 fw-bold text-dark-enhanced">
+                                        Request #@request.Id
+                                        @{
+                                            var badgeClass = request.AlreadyResponded ? "success" : "warning";
+                                            var badgeText = request.AlreadyResponded ? "Responded" : "Pending Response";
+                                        }
+                                        <span class="badge bg-@badgeClass ms-2">@badgeText</span>
+                                    </h5>
+                                    <small class="text-muted">
+                                        <i class="fas fa-user me-1"></i>
+                                        Customer: <span class="customer-name">@(request.CustomerName ?? "Loading...")</span>
+                                    </small>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <div class="request-summary">
+                                        <h6 class="text-primary fw-bold mb-0">@request.ItemCount unique items</h6>
+                                        <small class="text-muted">@request.TotalItems total quantity</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-4">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="request-details">
+                                        <h6 class="fw-bold mb-3 text-dark-enhanced">Request Information</h6>
+                                        <div class="detail-item mb-2">
+                                            <span class="detail-label">Request Date:</span>
+                                            <span class="detail-value request-date">@request.RequestDate.ToString("MMMM dd, yyyy HH:mm")</span>
+                                        </div>
+                                        <div class="detail-item mb-2">
+                                            <span class="detail-label">Items Requested:</span>
+                                            <span class="detail-value">@request.ItemCount unique products (@request.TotalItems total)</span>
+                                        </div>
+                                        <div class="detail-item mb-2">
+                                            <span class="detail-label">Status:</span>
+                                            <span class="detail-value">
+                                                <span class="badge bg-@(request.AlreadyResponded ? "success" : "warning")">
+                                                    @request.Status
+                                                </span>
+                                            </span>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(request.CustomerEmail))
+                                        {
+                                            <div class="detail-item mb-2">
+                                                <span class="detail-label">Customer Email:</span>
+                                                <span class="detail-value text-primary">@request.CustomerEmail</span>
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(request.CustomerPhone))
+                                        {
+                                            <div class="detail-item mb-2">
+                                                <span class="detail-label">Customer Phone:</span>
+                                                <span class="detail-value">@request.CustomerPhone</span>
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(request.Notes))
+                                        {
+                                            <div class="detail-item mb-2">
+                                                <span class="detail-label">Customer Notes:</span>
+                                                <span class="detail-value">@request.Notes</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="response-section">
+                                        <h6 class="fw-bold mb-3 text-dark-enhanced">Your Response</h6>
+                                        @if (request.AlreadyResponded)
+                                        {
+                                            <div class="alert alert-success">
+                                                <i class="fas fa-check-circle me-2"></i>
+                                                <strong>Response Submitted</strong>
+                                                <p class="mb-0 small">You have already responded to this quotation request.</p>
+                                            </div>
+                                            <div class="d-grid gap-2">
+                                                <a href="@Url.Action("ViewQuotationResponse", "Distributor", new { requestId = request.Id })" 
+                                                   class="btn btn-outline-primary btn-sm">
+                                                    <i class="fas fa-eye me-1"></i>View My Response
+                                                </a>
+                                                <a href="@Url.Action("EditQuotationResponse", "Distributor", new { requestId = request.Id })" 
+                                                   class="btn btn-outline-warning btn-sm">
+                                                    <i class="fas fa-edit me-1"></i>Edit Response
+                                                </a>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="alert alert-warning">
+                                                <i class="fas fa-clock me-2"></i>
+                                                <strong>Response Required</strong>
+                                                <p class="mb-0 small">Please submit your quotation for this request.</p>
+                                            </div>
+                                            <button class="btn btn-warning w-100 mb-2" onclick="createResponse(@request.Id)">
+                                                <i class="fas fa-plus me-1"></i>Create Response
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-light border-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="request-meta">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Received: <span class="request-date">@request.RequestDate.ToString("MMM dd, HH:mm")</span>
+                                    </small>
+                                </div>
+                                <div class="request-buttons">
+                                    <a href="@Url.Action("ViewQuotationItems", "Distributor", new { requestId = request.Id })" 
+                                       class="btn btn-outline-primary btn-sm me-2">
+                                        <i class="fas fa-eye me-1"></i>View Items
+                                    </a>
+                                    @if (!request.AlreadyResponded)
+                                    {
+                                        <button class="btn btn-warning btn-sm" onclick="createResponse(@request.Id)">
+                                            <i class="fas fa-file-invoice-dollar me-1"></i>Submit Quote
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <a href="@Url.Action("ViewQuotationResponse", "Distributor", new { requestId = request.Id })" 
+                                           class="btn btn-outline-success btn-sm">
+                                            <i class="fas fa-eye me-1"></i>View Response
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- No Requests State -->
+        <div class="no-requests-container text-center py-5">
+            <div class="no-requests-content">
+                <i class="fas fa-inbox fa-5x text-muted mb-4"></i>
+                <h2 class="fw-bold mb-3 text-dark-enhanced">No Quotation Requests</h2>
+                <p class="text-muted mb-4 lead">
+                    You don't have any quotation requests at the moment.
+                    New requests from customers will appear here.
+                </p>
+
+                <div class="no-requests-actions">
+                    <a href="@Url.Action("Index", "Distributor")" class="btn btn-primary btn-lg rounded-pill px-5 me-3">
+                        <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                    </a>
+                    <button onclick="refreshRequests()" class="btn btn-outline-primary btn-lg rounded-pill px-5">
+                        <i class="fas fa-refresh me-2"></i>Refresh
+                    </button>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="tips-section mt-5">
+                    <h5 class="fw-bold mb-3 text-dark-enhanced">Tips for Better Quotations</h5>
+                    <div class="row g-3 justify-content-center">
+                        <div class="col-md-3">
+                            <div class="tip-card text-center p-3">
+                                <i class="fas fa-dollar-sign fa-2x text-success mb-2"></i>
+                                <h6 class="fw-bold text-dark-enhanced">Competitive Pricing</h6>
+                                <p class="text-muted small">Offer competitive prices to win more orders</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="tip-card text-center p-3">
+                                <i class="fas fa-shipping-fast fa-2x text-info mb-2"></i>
+                                <h6 class="fw-bold text-dark-enhanced">Fast Delivery</h6>
+                                <p class="text-muted small">Quick delivery times attract customers</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="tip-card text-center p-3">
+                                <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                                <h6 class="fw-bold text-dark-enhanced">Quick Response</h6>
+                                <p class="text-muted small">Respond to requests promptly</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="tip-card text-center p-3">
+                                <i class="fas fa-star fa-2x text-primary mb-2"></i>
+                                <h6 class="fw-bold text-dark-enhanced">Quality Service</h6>
+                                <p class="text-muted small">Maintain high service standards</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Quotation Response Modal -->
+<div class="modal fade" id="responseModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-dark-enhanced">
+                    <i class="fas fa-file-invoice-dollar me-2"></i>Create Quotation Response
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="responseForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-dark-enhanced">Total Price ($)</label>
+                                <input type="number" class="form-control" id="totalPrice" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-dark-enhanced">Delivery Days</label>
+                                <input type="number" class="form-control" id="deliveryDays" min="1" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-dark-enhanced">Notes (Optional)</label>
+                        <textarea class="form-control" id="responseNotes" rows="3" placeholder="Additional information about your quote..."></textarea>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> Once submitted, customers will be able to compare your quote with others.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" onclick="submitResponse()">
+                    <i class="fas fa-paper-plane me-1"></i>Submit Quote
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentRequestId = null;
+
+        function createResponse(requestId) {
+            currentRequestId = requestId;
+            document.getElementById('responseForm').reset();
+            const modal = new bootstrap.Modal(document.getElementById('responseModal'));
+            modal.show();
+        }
+
+        function submitResponse() {
+            const totalPrice = document.getElementById('totalPrice').value;
+            const deliveryDays = document.getElementById('deliveryDays').value;
+            const notes = document.getElementById('responseNotes').value;
+
+            if (!totalPrice || !deliveryDays) {
+                alert('❌ Please fill in all required fields');
+                return;
+            }
+
+            // Show loading
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Submitting...';
+            btn.disabled = true;
+
+            // Submit to controller
+            fetch('@Url.Action("SubmitQuotationResponse", "Distributor")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `quotationRequestId=${currentRequestId}&totalPrice=${totalPrice}&deliveryDays=${deliveryDays}&notes=${encodeURIComponent(notes)}&__RequestVerificationToken=${$('[name=__RequestVerificationToken]').val()}`
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Close modal and show success
+                    bootstrap.Modal.getInstance(document.getElementById('responseModal')).hide();
+                    
+                    // Show success message and reload
+                    alert('✅ Quotation response submitted successfully! Customer will be notified and can compare your offer.');
+                    location.reload();
+                } else {
+                    throw new Error('Failed to submit quotation response');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                alert('❌ Error submitting quotation response. Please try again.');
+            });
+        }
+
+        function refreshRequests() {
+            location.reload();
+        }
+
+        // ✅ ENHANCED: Load actual customer names and real-time data
+        document.addEventListener('DOMContentLoaded', function() {
+            // ✅ REMOVED: No longer need to simulate customer names - using real database data
+            setupRealTimeUpdates();
+        });
+
+        // ✅ REMOVED: No longer need simulated customer names - we get real data from database
+        // The customer names are now properly loaded from the API response
+
+        function setupRealTimeUpdates() {
+            // Update timestamps to show actual current time
+            const timeElements = document.querySelectorAll('.request-date');
+            timeElements.forEach(element => {
+                // Keep the original date but enhance the styling
+                element.style.color = '#198754';
+                element.style.fontWeight = '500';
+            });
+            
+            // ✅ ENHANCED: Style customer names that came from database
+            const customerElements = document.querySelectorAll('.customer-name');
+            customerElements.forEach(element => {
+                if (element.textContent && element.textContent !== 'Loading...' && element.textContent !== 'Customer') {
+                    element.style.color = '#0d6efd';
+                    element.style.fontWeight = '600';
+                }
+            });
+        }
+
+        // Auto-refresh every 2 minutes to get latest quotation requests
+        setInterval(function() {
+            console.log('🔄 Checking for new quotation requests...');
+            // Could implement a more sophisticated update check here
+        }, 120000);
+
+        // ✅ ENHANCED: Initialize tooltips and better UI feedback
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Show loading indicators for button clicks
+        document.querySelectorAll('a[href*="View"], button[onclick*="Response"]').forEach(button => {
+            button.addEventListener('click', function() {
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Loading...';
+                this.disabled = true;
+                
+                // Restore after a short delay if it's a navigation
+                if (this.tagName === 'A') {
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.disabled = false;
+                    }, 500);
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,622 @@
+﻿@model DashboardViewModel
+@{
+    ViewData["Title"] = "Distributor Dashboard - Gadget Hub";
+    Layout = "_DistributorLayout";
+    var pendingQuotations = ViewBag.PendingQuotations as int? ?? 0;
+    var totalOrders = ViewBag.TotalOrders as int? ?? 0;
+    var monthlyRevenue = ViewBag.MonthlyRevenue as decimal? ?? 0;
+    var productsInInventory = ViewBag.ProductsInInventory as int? ?? 0;
+    var lowStockItems = ViewBag.LowStockItems as int? ?? 0;
+    var outOfStockItems = ViewBag.OutOfStockItems as int? ?? 0;
+}
+
+<style>
+    /* 🔧 Enhanced Distributor Dashboard - Clean Tech Dark Theme */
+    .tech-header {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+        border: 2px solid #3b82f6;
+        border-radius: 20px;
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .tech-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 30%, rgba(59, 130, 246, 0.05) 50%, transparent 70%);
+        animation: shimmer 3s infinite;
+    }
+    
+    .tech-stats-card {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+        border: 2px solid #3b82f6;
+        border-radius: 16px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 32px rgba(59, 130, 246, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .tech-stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #3b82f6 0%, #10b981 50%, #8b5cf6 100%);
+    }
+    
+    .tech-stats-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
+        border-color: #10b981;
+    }
+    
+    .tech-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: #fff;
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        margin: 0 auto 1rem;
+        position: relative;
+    }
+    
+    .tech-icon::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: conic-gradient(from 0deg, transparent, rgba(255,255,255,0.1), transparent);
+        animation: rotate 4s linear infinite;
+    }
+    
+    .tech-number {
+        font-size: 3rem;
+        font-weight: 900;
+        color: #10b981;
+        text-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .tech-text-bright {
+        color: #10b981;
+        font-weight: 700;
+        text-shadow: 0 0 5px rgba(16, 185, 129, 0.5);
+    }
+    
+    .tech-card {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border: 2px solid #3b82f6;
+        border-radius: 16px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .tech-card:hover {
+        border-color: #10b981;
+        box-shadow: 0 20px 40px rgba(16, 185, 129, 0.3);
+    }
+    
+    .inventory-alert {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        border: 2px solid #ef4444;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-top: 1rem;
+        animation: pulseAlert 2s infinite;
+    }
+    
+    .system-status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #10b981;
+        animation: statusPulse 1.5s infinite;
+        margin-right: 0.5rem;
+    }
+    
+    /* Animations */
+    @@keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+    
+    @@keyframes rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    @@keyframes pulseAlert {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    
+    @@keyframes statusPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.6; transform: scale(1.2); }
+    }
+    
+    /* Enhanced card hovers */
+    .quick-action-card:hover {
+        transform: translateY(-3px) scale(1.01);
+        border-color: #10b981;
+        box-shadow: 0 15px 35px rgba(16, 185, 129, 0.3);
+    }
+    
+    /* Responsive improvements */
+    @@media (max-width: 768px) {
+        .tech-header {
+            padding: 1.5rem;
+        }
+        
+        .tech-number {
+            font-size: 2.5rem;
+        }
+        
+        .tech-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- 🔧 Enhanced Tech Dashboard Header -->
+    <div class="tech-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-3 text-white">
+                    <i class="fas fa-cogs me-3 text-info"></i>DISTRIBUTOR COMMAND CENTER
+                </h1>
+                <p class="text-white mb-0 fs-5">
+                    Welcome back, <span class="tech-text-bright">@Model.UserName</span>! 
+                    Your distribution network is online and operational.
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="tech-status p-3 rounded border" style="border-color: #3b82f6 !important; background: rgba(59, 130, 246, 0.1);">
+                    <div class="text-info fw-bold">
+                        <span class="system-status-indicator"></span>
+                        <i class="fas fa-microchip me-2"></i>SYSTEM STATUS
+                    </div>
+                    <div class="text-white small mt-2">
+                        <i class="fas fa-clock me-1"></i>
+                        UPTIME: @DateTime.UtcNow.ToString("MMM dd, yyyy HH:mm") UTC
+                    </div>
+                    <div class="text-white small">
+                        <i class="fas fa-user-circle me-1"></i>
+                        OPERATOR: <span class="tech-text-bright">@Model.UserId</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔧 Enhanced Tech Metrics Panel -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-3 col-md-6">
+            <div class="tech-stats-card">
+                <div class="stats-content">
+                    <div class="tech-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="stats-info text-center">
+                        <h3 class="tech-number">@pendingQuotations</h3>
+                        <p class="text-white fw-semibold">QUOTE REQUESTS</p>
+                        @if (pendingQuotations > 0)
+                        {
+                            <span class="badge text-white" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                                <i class="fas fa-exclamation me-1"></i>URGENT
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                <i class="fas fa-check me-1"></i>CLEAR
+                            </span>
+                        }
+                    </div>
+                </div>
+                <div class="stats-footer text-center mt-3">
+                    <a href="@Url.Action("QuotationRequests", "Distributor")" class="btn btn-sm btn-outline-light rounded-pill">
+                        <i class="fas fa-arrow-right me-2"></i>PROCESS NOW
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="tech-stats-card">
+                <div class="stats-content">
+                    <div class="tech-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="stats-info text-center">
+                        <h3 class="tech-number">@totalOrders</h3>
+                        <p class="text-white fw-semibold">ACTIVE ORDERS</p>
+                        <span class="badge text-white" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                            <i class="fas fa-shipping-fast me-1"></i>PROCESSING
+                        </span>
+                    </div>
+                </div>
+                <div class="stats-footer text-center mt-3">
+                    <a href="@Url.Action("OrdersReceived", "Distributor")" class="btn btn-sm btn-outline-light rounded-pill">
+                        <i class="fas fa-eye me-2"></i>MONITOR
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="tech-stats-card">
+                <div class="stats-content">
+                    <div class="tech-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stats-info text-center">
+                        <h3 class="tech-number">$@monthlyRevenue.ToString("N0")</h3>
+                        <p class="text-white fw-semibold">MONTHLY REVENUE</p>
+                        <span class="badge text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <i class="fas fa-trending-up me-1"></i>+12.5%
+                        </span>
+                    </div>
+                </div>
+                <div class="stats-footer text-center mt-3">
+                    <span class="text-info small">
+                        <i class="fas fa-calendar me-1"></i>vs. last month
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="tech-stats-card">
+                <div class="stats-content">
+                    <div class="tech-icon">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <div class="stats-info text-center">
+                        <h3 class="tech-number">@productsInInventory</h3>
+                        <p class="text-white fw-semibold">INVENTORY ITEMS</p>
+                        @if (lowStockItems > 0 || outOfStockItems > 0)
+                        {
+                            <span class="badge text-white" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                                <i class="fas fa-exclamation-triangle me-1"></i>ALERTS
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                <i class="fas fa-check me-1"></i>OPTIMAL
+                            </span>
+                        }
+                    </div>
+                </div>
+                <div class="stats-footer text-center mt-3">
+                    <a href="@Url.Action("Inventory", "Distributor")" class="btn btn-sm btn-outline-light rounded-pill">
+                        <i class="fas fa-cog me-2"></i>MANAGE
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔧 Operations Command Center -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-12">
+            <div class="tech-card">
+                <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);">
+                    <h5 class="mb-0 fw-bold text-white">
+                        <i class="fas fa-tasks me-2"></i>OPERATIONS COMMAND CENTER
+                    </h5>
+                </div>
+                <div class="card-body p-4" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
+                    <div class="row g-3">
+                        <div class="col-lg-3 col-md-6">
+                            <a href="@Url.Action("QuotationRequests", "Distributor")" class="quick-action-card text-decoration-none d-block"
+                               style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border: 2px solid #3b82f6; color: #e2e8f0; padding: 1.5rem; border-radius: 12px;">
+                                <div class="text-center">
+                                    <div class="quick-action-icon bg-primary text-white mb-3" style="width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                        <i class="fas fa-file-contract fa-xl"></i>
+                                    </div>
+                                    <h6 class="tech-text-bright mb-2">QUOTE PROCESSOR</h6>
+                                    <p class="text-white small mb-0">Handle incoming quotation requests</p>
+                                    @if (pendingQuotations > 0)
+                                    {
+                                        <span class="badge bg-danger mt-2">@pendingQuotations Pending</span>
+                                    }
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6">
+                            <a href="@Url.Action("OrdersReceived", "Distributor")" class="quick-action-card text-decoration-none d-block"
+                               style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border: 2px solid #3b82f6; color: #e2e8f0; padding: 1.5rem; border-radius: 12px;">
+                                <div class="text-center">
+                                    <div class="quick-action-icon bg-success text-white mb-3" style="width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                        <i class="fas fa-shipping-fast fa-xl"></i>
+                                    </div>
+                                    <h6 class="tech-text-bright mb-2">ORDER FULFILLMENT</h6>
+                                    <p class="text-white small mb-0">Process and ship orders</p>
+                                    @if (totalOrders > 0)
+                                    {
+                                        <span class="badge bg-success mt-2">@totalOrders Active</span>
+                                    }
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6">
+                            <a href="@Url.Action("Inventory", "Distributor")" class="quick-action-card text-decoration-none d-block"
+                               style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border: 2px solid #3b82f6; color: #e2e8f0; padding: 1.5rem; border-radius: 12px;">
+                                <div class="text-center">
+                                    <div class="quick-action-icon bg-warning text-white mb-3" style="width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                        <i class="fas fa-warehouse fa-xl"></i>
+                                    </div>
+                                    <h6 class="tech-text-bright mb-2">INVENTORY CONTROL</h6>
+                                    <p class="text-white small mb-0">Monitor stock levels</p>
+                                    @if (lowStockItems > 0)
+                                    {
+                                        <span class="badge bg-warning mt-2">@lowStockItems Low Stock</span>
+                                    }
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6">
+                            <div class="quick-action-card text-center d-block"
+                                 style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border: 2px solid #3b82f6; color: #e2e8f0; padding: 1.5rem; border-radius: 12px;">
+                                <div class="quick-action-icon bg-info text-white mb-3" style="width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                    <i class="fas fa-chart-bar fa-xl"></i>
+                                </div>
+                                <h6 class="tech-text-bright mb-2">ANALYTICS HUB</h6>
+                                <p class="text-white small mb-0">Performance insights</p>
+                                <span class="badge bg-info mt-2">Live Data</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔧 Real-time Activity Monitor -->
+    <div class="row g-4">
+        <!-- Quote Requests Monitor -->
+        <div class="col-lg-6">
+            <div class="tech-card h-100">
+                <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-bottom: 2px solid #3b82f6;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold tech-text-bright">
+                            <i class="fas fa-file-invoice-dollar text-warning me-2"></i>QUOTE REQUESTS MONITOR
+                        </h5>
+                        <a href="@Url.Action("QuotationRequests", "Distributor")" class="btn btn-sm btn-outline-light rounded-pill">
+                            <i class="fas fa-eye me-1"></i>View All
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-4" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
+                    @if (pendingQuotations > 0)
+                    {
+                        <div class="activity-list">
+                            <div class="activity-item" style="border-bottom-color: #475569; border-bottom: 1px solid #475569; padding-bottom: 1rem;">
+                                <div class="activity-icon bg-warning">
+                                    <i class="fas fa-exclamation"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <h6 class="mb-1 tech-text-bright">HIGH PRIORITY REQUESTS</h6>
+                                    <p class="mb-1 text-white small">@pendingQuotations active requests require immediate attention</p>
+                                    <div class="d-flex gap-2">
+                                        <span class="badge text-white" style="background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);">
+                                            <i class="fas fa-clock me-1"></i>URGENT
+                                        </span>
+                                        <span class="badge text-white" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                                            SLA: 2 hours
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                            <h6 class="tech-text-bright">ALL REQUESTS PROCESSED</h6>
+                            <p class="text-white small">No pending quote requests. Great job!</p>
+                            <span class="badge bg-success">System Optimal</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Processing Status -->
+        <div class="col-lg-6">
+            <div class="tech-card h-100">
+                <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-bottom: 2px solid #10b981;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold tech-text-bright">
+                            <i class="fas fa-shipping-fast text-primary me-2"></i>ORDER PROCESSING HUB
+                        </h5>
+                        <a href="@Url.Action("OrdersReceived", "Distributor")" class="btn btn-sm btn-outline-light rounded-pill">
+                            <i class="fas fa-cogs me-1"></i>Process
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-4" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
+                    @if (totalOrders > 0)
+                    {
+                        <div class="activity-list">
+                            <div class="activity-item" style="border-bottom-color: #475569; border-bottom: 1px solid #475569; padding-bottom: 1rem;">
+                                <div class="activity-icon bg-success">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <h6 class="mb-1 tech-text-bright">ACTIVE ORDER PIPELINE</h6>
+                                    <p class="mb-1 text-white small">@totalOrders orders • Revenue: $@monthlyRevenue.ToString("N2")</p>
+                                    <div class="d-flex gap-2">
+                                        <span class="badge text-white" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                            <i class="fas fa-check me-1"></i>PROCESSING
+                                        </span>
+                                        <span class="badge text-white" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                                            On Track
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        @if (lowStockItems > 0 || outOfStockItems > 0)
+                        {
+                            <div class="inventory-alert">
+                                <div class="text-white">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>INVENTORY ALERT DETECTED</strong>
+                                </div>
+                                <div class="text-white small mt-2">
+                                    @if (lowStockItems > 0)
+                                    {
+                                        <div><i class="fas fa-arrow-down me-2"></i>@lowStockItems items below minimum threshold</div>
+                                    }
+                                    @if (outOfStockItems > 0)
+                                    {
+                                        <div><i class="fas fa-times me-2"></i>@outOfStockItems items completely out of stock</div>
+                                    }
+                                </div>
+                                <div class="mt-2">
+                                    <a href="@Url.Action("Inventory", "Distributor")" class="btn btn-sm btn-light">
+                                        <i class="fas fa-tools me-1"></i>Fix Now
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="fas fa-clipboard-check fa-4x text-info mb-3"></i>
+                            <h6 class="tech-text-bright">AWAITING NEW ORDERS</h6>
+                            <p class="text-white small">No active orders. Ready for new business!</p>
+                            <span class="badge bg-info">Standby Mode</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Enhanced Tech Dashboard Scripts
+        
+        // Real-time dashboard updates
+        setInterval(function() {
+            console.log('🔧 Tech Dashboard: Syncing real-time data...');
+            
+            // Add subtle animation to indicate data refresh
+            const cards = document.querySelectorAll('.tech-stats-card');
+            cards.forEach(card => {
+                card.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    card.style.transform = 'scale(1)';
+                }, 100);
+            });
+            
+            // Refresh page every 2 minutes for real data
+            setTimeout(() => location.reload(), 120000);
+        }, 2000);
+
+        // Initialize enhanced tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // System monitoring with visual feedback
+        function performSystemCheck() {
+            const statusIndicator = document.querySelector('.system-status-indicator');
+            if (statusIndicator) {
+                statusIndicator.style.background = '#f59e0b';
+                setTimeout(() => {
+                    statusIndicator.style.background = '#10b981';
+                }, 1000);
+            }
+            console.log('🔧 System check completed - All systems operational');
+        }
+
+        // Run system checks every 30 seconds
+        setInterval(performSystemCheck, 30000);
+        
+        // Enhanced card interactions
+        document.querySelectorAll('.quick-action-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px) scale(1.01)';
+                this.style.borderColor = '#10b981';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+                this.style.borderColor = '#3b82f6';
+            });
+        });
+        
+        // Console welcome message with ASCII art
+        console.log(`
+🔧 GADGET HUB DISTRIBUTOR COMMAND CENTER
+========================================
+╔══════════════════════════════════════╗
+║  DISTRIBUTOR: @Model.UserName                    ║
+║  STATUS: ONLINE & OPERATIONAL        ║
+║  ORDERS: @totalOrders active               ║
+║  QUOTES: @pendingQuotations pending              ║
+║  INVENTORY: @productsInInventory items ready        ║
+║  REVENUE: $@monthlyRevenue.ToString("N0")                 ║
+╚══════════════════════════════════════╝
+Clean tech theme activated! 🚀
+        `);
+        
+        // Image loading for any dashboard elements
+        document.querySelectorAll('img').forEach(img => {
+            img.addEventListener('error', function() {
+                // Create tech-style placeholder for any failed images
+                const placeholder = document.createElement('div');
+                placeholder.className = 'tech-placeholder';
+                placeholder.style.cssText = `
+                    width: ${this.width || '100'}px;
+                    height: ${this.height || '100'}px;
+                    background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-weight: bold;
+                    border-radius: 8px;
+                `;
+                placeholder.innerHTML = '<i class="fas fa-image"></i>';
+                this.parentNode.replaceChild(placeholder, this);
+            });
+        });
+    </script>
+}

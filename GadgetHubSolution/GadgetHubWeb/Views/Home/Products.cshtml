@@ -1,0 +1,419 @@
+﻿@using GadgetHubWeb.Models
+@model ProductsViewModel
+@{
+    ViewData["Title"] = "Products - Gadget Hub";
+    var products = Model.Products ?? new List<ProductDto>();
+    var categories = Model.Categories ?? new List<CategoryDto>();
+    var isAuthenticated = ViewBag.IsAuthenticated as bool? ?? false;
+}
+
+<div class="products-page">
+    <!-- Page Header -->
+    <div class="page-header bg-gradient-primary text-white py-5 mb-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="display-5 fw-bold mb-3">
+                        <i class="fas fa-mobile-alt me-3"></i>Premium Tech Products
+                    </h1>
+                    <p class="lead mb-0">Discover our collection of @products.Count cutting-edge gadgets</p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <div class="header-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">@products.Count</span>
+                            <span class="stat-label">Products Available</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Search and Filters -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <form method="get" asp-action="Products" class="row g-3 align-items-center">
+                            <div class="col-lg-4">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-0">
+                                        <i class="fas fa-search text-muted"></i>
+                                    </span>
+                                    <input type="text" asp-for="SearchQuery" class="form-control border-0 bg-light"
+                                           placeholder="Search products..." value="@Model.SearchQuery">
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <select asp-for="CategoryId" class="form-select border-0 bg-light">
+                                    <option value="">All Categories</option>
+                                    @foreach (var category in categories)
+                                    {
+                                        <option value="@category.Id" selected="@(Model.CategoryId == category.Id)">
+                                            @category.Name
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-lg-3">
+                                <select asp-for="SortBy" class="form-select border-0 bg-light">
+                                    <option value="name">Name A-Z</option>
+                                    <option value="name_desc">Name Z-A</option>
+                                    <option value="newest">Newest First</option>
+                                    <option value="brand">Brand</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-2">
+                                <button type="submit" class="btn btn-primary w-100 rounded-pill">
+                                    <i class="fas fa-filter me-1"></i>Filter
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        @if (products.Any())
+        {
+            <div class="row g-4" id="productsGrid">
+                @foreach (var product in products)
+                {
+                    <div class="col-lg-3 col-md-6">
+                        <div class="product-card h-100" data-product-id="@product.Id">
+                            <div class="product-image-container">
+                                <!-- Enhanced Image with Better Error Handling -->
+                                @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                {
+                                    <img src="@product.ImageUrl"
+                                         alt="@product.Name" 
+                                         class="product-image"
+                                         loading="lazy"
+                                         style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0;"
+                                         data-product-name="@product.Name"
+                                         data-brand="@product.Brand">
+                                }
+                                else
+                                {
+                                    <!-- No image URL provided, show branded placeholder -->
+                                    <div class="product-image-placeholder d-flex" 
+                                         style="height: 200px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); 
+                                                align-items: center; justify-content: center; color: white; border-radius: 8px 8px 0 0;
+                                                position: relative; overflow: hidden;">
+                                        <div class="text-center" style="z-index: 2; position: relative;">
+                                            <i class="fas fa-mobile-alt fa-3x mb-2"></i>
+                                            <div class="fw-bold">@product.Name</div>
+                                            <small>@product.Brand</small>
+                                        </div>
+                                        <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; 
+                                                   background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+                                                   transform: rotate(45deg); animation: shimmer 2s infinite; z-index: 1;"></div>
+                                    </div>
+                                }
+
+                                <!-- Product Badge -->
+                                @if (!string.IsNullOrEmpty(product.Brand))
+                                {
+                                    <div class="product-badge">
+                                        <span class="badge bg-primary">@product.Brand</span>
+                                    </div>
+                                }
+
+                                <!-- Product Overlay -->
+                                <div class="product-overlay">
+                                    <div class="overlay-buttons">
+                                        <a href="@Url.Action("ProductDetail", "Home", new { id = product.Id })"
+                                           class="btn btn-light btn-sm rounded-pill me-2" data-bs-toggle="tooltip" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        @if (isAuthenticated)
+                                        {
+                                            <button onclick="addToCart(@product.Id)"
+                                                    class="btn btn-primary btn-sm rounded-pill" data-bs-toggle="tooltip" title="Add to Cart">
+                                                <i class="fas fa-shopping-cart"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <a href="@Url.Action("Login", "Auth", new { returnUrl = Url.Action("Products", "Home") })"
+                                               class="btn btn-primary btn-sm rounded-pill" data-bs-toggle="tooltip" title="Login to Add to Cart">
+                                                <i class="fas fa-shopping-cart"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-body p-3">
+                                <h6 class="card-title fw-bold mb-2">@product.Name</h6>
+                                <p class="card-text text-muted small mb-3">
+                                    @(product.Description?.Length > 80 ? product.Description.Substring(0, 80) + "..." : product.Description)
+                                </p>
+
+                                <!-- Rating -->
+                                <div class="product-rating mb-3">
+                                    <div class="stars">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="fas fa-star @(i <= 4 ? "text-warning" : "text-muted")"></i>
+                                        }
+                                    </div>
+                                    <small class="text-muted ms-1">(4.5)</small>
+                                </div>
+
+                                <!-- Quotation Info (Instead of Price) -->
+                                <div class="quotation-info mb-3">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="text-primary fw-bold">
+                                            <i class="fas fa-file-invoice-dollar me-1"></i>
+                                            Request Quote
+                                        </span>
+                                        @if (product.DistributorCount > 0)
+                                        {
+                                            <span class="badge bg-success">@product.DistributorCount distributors</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">Contact for availability</span>
+                                        }
+                                    </div>
+                                    <small class="text-muted">Get competitive prices from multiple distributors</small>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="product-actions">
+                                    <div class="row g-2">
+                                        <div class="col-8">
+                                            @if (isAuthenticated)
+                                            {
+                                                <button onclick="addToCart(@product.Id)" class="btn btn-success btn-sm w-100 rounded-pill">
+                                                    <i class="fas fa-plus me-1"></i>Add to Cart
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <a href="@Url.Action("Login", "Auth")" class="btn btn-success btn-sm w-100 rounded-pill">
+                                                    <i class="fas fa-sign-in-alt me-1"></i>Login to Request
+                                                </a>
+                                            }
+                                        </div>
+                                        <div class="col-4">
+                                            <a href="@Url.Action("ProductDetail", "Home", new { id = product.Id })"
+                                               class="btn btn-outline-primary btn-sm w-100 rounded-pill">
+                                                <i class="fas fa-info"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Information Banner -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="alert alert-info border-0 shadow-sm">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="alert-heading mb-2">
+                                    <i class="fas fa-info-circle me-2"></i>How Our Quotation System Works
+                                </h5>
+                                <p class="mb-0">Add products to your cart and request quotations from multiple distributors to get the best prices and delivery terms. No upfront pricing - get competitive quotes tailored to your needs!</p>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <a href="@Url.Action("Cart", "Home")" class="btn btn-primary rounded-pill">
+                                    <i class="fas fa-shopping-cart me-2"></i>View Cart
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- No Products Found -->
+            <div class="no-products-container text-center py-5">
+                <div class="no-products-content">
+                    <i class="fas fa-search fa-4x text-muted mb-4"></i>
+                    <h3 class="fw-bold mb-3">No Products Found</h3>
+                    <p class="text-muted mb-4">We couldn't find any products matching your criteria. Try adjusting your search filters.</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="@Url.Action("Products", "Home")" class="btn btn-primary rounded-pill px-4">
+                            <i class="fas fa-refresh me-2"></i>Clear Filters
+                        </a>
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary rounded-pill px-4">
+                            <i class="fas fa-home me-2"></i>Go Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Enhanced Product Image System -->
+    <script src="~/js/product-images.js"></script>
+    
+    <script>
+        function addToCart(productId) {
+            // Show loading state
+            const btn = event.target.closest('button');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+
+            // Send POST request
+            fetch('@Url.Action("AddToCart", "Home")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': '@Html.AntiForgeryToken().ToString()'
+                },
+                body: `productId=${productId}&quantity=1`
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Show success animation
+                    btn.innerHTML = '<i class="fas fa-check"></i> Added!';
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-primary');
+
+                    // Update cart count (implement based on your cart logic)
+                    updateCartCount();
+
+                    // Reset button after 2 seconds
+                    setTimeout(() => {
+                        btn.innerHTML = originalHtml;
+                        btn.classList.remove('btn-primary');
+                        btn.classList.add('btn-success');
+                        btn.disabled = false;
+                    }, 2000);
+                } else {
+                    throw new Error('Failed to add to cart');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                btn.classList.add('btn-danger');
+
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.classList.remove('btn-danger');
+                    btn.disabled = false;
+                }, 2000);
+            });
+        }
+
+        function updateCartCount() {
+            // Update cart count in navigation
+            console.log('Cart count updated - implement based on your cart logic');
+        }
+
+        // Enhanced initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Auto-hide success alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert-success').fadeOut();
+            }, 5000);
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        /* Enhanced product image styles */
+        .product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .product-image-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .product-image {
+            transition: all 0.3s ease;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .product-image.loading {
+            opacity: 0.7;
+            filter: blur(1px);
+        }
+        
+        .product-image.loaded {
+            opacity: 1;
+            filter: none;
+        }
+        
+        .product-image.error {
+            display: none !important;
+        }
+        
+        .product-image-placeholder {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        /* CSS Keyframes */
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @@keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        .product-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 3;
+        }
+        
+        .product-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .product-card:hover .product-overlay {
+            opacity: 1;
+        }
+        
+        .overlay-buttons {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+}

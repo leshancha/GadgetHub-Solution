@@ -1,0 +1,287 @@
+@model QuotationResponseDto
+@{
+    ViewData["Title"] = "Edit Quotation Response";
+    Layout = "_DistributorLayout";
+    var requestId = ViewBag.RequestId as int? ?? Model.QuotationRequestId;
+}
+
+<style>
+    .text-dark-enhanced { color: #212529 !important; font-weight: 500; }
+    .detail-label { color: #495057 !important; font-weight: 600; min-width: 140px; display: inline-block; }
+    .detail-value { color: #212529 !important; font-weight: 500; }
+    .card-body { background-color: #ffffff; }
+    h1, h2, h3, h4, h5, h6 { color: #212529 !important; }
+    .form-label { color: #212529 !important; font-weight: 600; }
+</style>
+
+<div class="edit-response-container">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2 text-dark-enhanced">
+                    <i class="fas fa-edit text-warning me-3"></i>Edit Quotation Response
+                </h1>
+                <p class="text-muted mb-0">Update your quotation response for Request #@requestId</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="@Url.Action("QuotationRequests", "Distributor")" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Requests
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Response Info -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-warning text-dark py-3">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-info-circle me-2"></i>Current Response Information
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="detail-item mb-2">
+                        <span class="detail-label">Current Total Price:</span>
+                        <span class="detail-value text-success fw-bold">$@Model.TotalPrice.ToString("N2")</span>
+                    </div>
+                    <div class="detail-item mb-2">
+                        <span class="detail-label">Current Delivery:</span>
+                        <span class="detail-value">@Model.AverageDeliveryDays days</span>
+                    </div>
+                    <div class="detail-item mb-2">
+                        <span class="detail-label">Submitted:</span>
+                        <span class="detail-value">@Model.SubmissionDate.ToString("MMM dd, yyyy HH:mm")</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-item mb-2">
+                        <span class="detail-label">Status:</span>
+                        <span class="detail-value">
+                            <span class="badge bg-success">@Model.Status</span>
+                        </span>
+                    </div>
+                    <div class="detail-item mb-2">
+                        <span class="detail-label">Items Count:</span>
+                        <span class="detail-value">@Model.ItemCount items</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Form -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-primary text-white py-3">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-edit me-2"></i>Update Response Details
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <form method="post" asp-action="UpdateQuotationResponse" asp-route-requestId="@requestId">
+                @Html.AntiForgeryToken()
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <label for="totalPrice" class="form-label">Total Price ($)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control form-control-lg" id="totalPrice" name="totalPrice" 
+                                       value="@Model.TotalPrice.ToString("F2")" step="0.01" min="0.01" required>
+                            </div>
+                            <div class="form-text">Enter your updated total price for all items</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="deliveryDays" class="form-label">Delivery Days</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control form-control-lg" id="deliveryDays" name="deliveryDays" 
+                                       value="@Model.AverageDeliveryDays" min="1" max="365" required>
+                                <span class="input-group-text">days</span>
+                            </div>
+                            <div class="form-text">Number of days needed for delivery</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="mb-4">
+                            <label for="notes" class="form-label">Updated Notes (Optional)</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="6" 
+                                      placeholder="Any updates or additional information about your quotation...">@Model.Notes</textarea>
+                            <div class="form-text">Add any updates or changes to your original quotation</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Price Comparison -->
+                <div class="alert alert-info">
+                    <h6 class="fw-bold mb-2">
+                        <i class="fas fa-calculator me-2"></i>Price Comparison
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <small class="text-muted">Original Price:</small>
+                            <div class="h5 text-muted">$@Model.TotalPrice.ToString("N2")</div>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted">New Price:</small>
+                            <div class="h5 text-primary" id="newPriceDisplay">$@Model.TotalPrice.ToString("N2")</div>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted">Difference:</small>
+                            <div class="h5" id="priceDifference">$0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions mt-4">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Important:</strong> Updating your response will notify the customer of the changes. 
+                                Make sure all information is accurate before submitting.
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-warning btn-lg" id="updateBtn">
+                                    <i class="fas fa-save me-2"></i>Update Response
+                                </button>
+                                <a href="@Url.Action("ViewQuotationResponse", "Distributor", new { requestId = requestId })" 
+                                   class="btn btn-outline-primary">
+                                    <i class="fas fa-eye me-2"></i>View Current Response
+                                </a>
+                                <a href="@Url.Action("QuotationRequests", "Distributor")" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Items Reference -->
+    @if (Model.Items?.Any() == true)
+    {
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-light py-3">
+                <h6 class="mb-0 fw-bold text-dark-enhanced">
+                    <i class="fas fa-list me-2"></i>Items in This Response (Reference)
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="text-dark-enhanced">Product</th>
+                                <th class="text-dark-enhanced">Quantity</th>
+                                <th class="text-dark-enhanced">Unit Price</th>
+                                <th class="text-dark-enhanced">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="@(item.ProductImage ?? "https://via.placeholder.com/30x30?text=IMG")" 
+                                                 alt="@item.ProductName" class="me-2" style="width: 30px; height: 30px; border-radius: 4px;">
+                                            <div>
+                                                <small class="fw-bold text-dark-enhanced">@item.ProductName</small>
+                                                <br><small class="text-muted">@item.ProductBrand</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><small class="fw-bold">@item.Quantity</small></td>
+                                    <td><small class="text-success">$@item.UnitPrice.ToString("N2")</small></td>
+                                    <td><small class="text-success fw-bold">$@item.TotalPrice.ToString("N2")</small></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        const originalPrice = @Model.TotalPrice;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setupPriceCalculator();
+            setupFormValidation();
+        });
+
+        function setupPriceCalculator() {
+            const totalPriceInput = document.getElementById('totalPrice');
+            const newPriceDisplay = document.getElementById('newPriceDisplay');
+            const priceDifference = document.getElementById('priceDifference');
+
+            totalPriceInput.addEventListener('input', function() {
+                const newPrice = parseFloat(this.value) || 0;
+                const difference = newPrice - originalPrice;
+
+                newPriceDisplay.textContent = `$${newPrice.toFixed(2)}`;
+                priceDifference.textContent = `${difference >= 0 ? '+' : ''}$${difference.toFixed(2)}`;
+                
+                // Update styling based on price change
+                if (difference > 0) {
+                    priceDifference.className = 'h5 text-success';
+                } else if (difference < 0) {
+                    priceDifference.className = 'h5 text-danger';
+                } else {
+                    priceDifference.className = 'h5 text-muted';
+                }
+            });
+        }
+
+        function setupFormValidation() {
+            const form = document.querySelector('form');
+            const updateBtn = document.getElementById('updateBtn');
+
+            form.addEventListener('submit', function(e) {
+                const totalPrice = document.getElementById('totalPrice').value;
+                const deliveryDays = document.getElementById('deliveryDays').value;
+
+                if (!totalPrice || parseFloat(totalPrice) <= 0) {
+                    e.preventDefault();
+                    alert('? Please enter a valid total price');
+                    return;
+                }
+
+                if (!deliveryDays || parseInt(deliveryDays) < 1) {
+                    e.preventDefault();
+                    alert('? Please enter valid delivery days (minimum 1)');
+                    return;
+                }
+
+                // Show loading state
+                updateBtn.disabled = true;
+                updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+            });
+        }
+
+        // Enhanced visual feedback
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.style.borderColor = '#0d6efd';
+                this.style.boxShadow = '0 0 0 0.2rem rgba(13, 110, 253, 0.25)';
+            });
+
+            input.addEventListener('blur', function() {
+                this.style.borderColor = '';
+                this.style.boxShadow = '';
+            });
+        });
+    </script>
+}

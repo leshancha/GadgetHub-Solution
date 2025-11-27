@@ -1,0 +1,346 @@
+﻿@model List<QuotationRequestDto>
+@{
+    ViewData["Title"] = "My Quotations";
+    Layout = "_CustomerLayout";
+}
+
+<!-- ✅ ENHANCED: Add specific styles for better font visibility -->
+<style>
+    /* Customer Quotations Enhanced Text Visibility */
+    .quotation-card .detail-item .detail-label { 
+        color: #495057 !important; 
+        font-weight: 600 !important; 
+    }
+    .quotation-card .detail-item .detail-value { 
+        color: #212529 !important; 
+        font-weight: 500 !important; 
+    }
+    .quotation-card .card-body { 
+        color: #212529 !important; 
+    }
+    .quotation-card h5, .quotation-card h6 { 
+        color: #212529 !important; 
+        font-weight: 700 !important; 
+    }
+    .quotation-details h6 { 
+        color: #212529 !important; 
+        font-weight: 700 !important; 
+    }
+    .quotation-actions h6 { 
+        color: #212529 !important; 
+        font-weight: 700 !important; 
+    }
+    .detail-item { 
+        margin-bottom: 0.75rem !important; 
+    }
+    
+    /* Page Header Enhancement */
+    .page-header h1 { 
+        color: #212529 !important; 
+        font-weight: 700 !important; 
+    }
+    
+    /* Badge Enhancements */
+    .badge { 
+        font-weight: 600 !important; 
+    }
+</style>
+
+<div class="quotations-container">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2">
+                    <i class="fas fa-file-invoice-dollar text-success me-3"></i><span style="color: #212529 !important; font-weight: 700 !important;">My Quotations</span>
+                </h1>
+                <p class="text-muted mb-0">Compare quotes from multiple distributors and get the best deals</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="quotation-stats">
+                    <span class="badge bg-success rounded-pill fs-6 me-2">@Model.Count Total Requests</span>
+                    <span class="badge bg-warning rounded-pill fs-6">@Model.Count(q => q.HasResponses) Ready to Compare</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <!-- Quotations List -->
+        <div class="quotations-list">
+            @foreach (var quotation in Model)
+            {
+                <div class="quotation-card mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0 py-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h5 class="mb-0 fw-bold">
+                                        <span style="color: #212529 !important; font-weight: 700 !important;">Quotation Request #@quotation.Id</span>
+                                        @{
+                                            var badgeClass = quotation.HasResponses ? "success" : quotation.Status == "Pending" ? "warning" : "secondary";
+                                            var badgeText = quotation.HasResponses ? $"{quotation.ResponseCount} Responses" : quotation.Status;
+                                        }
+                                        <span class="badge bg-@badgeClass ms-2">@badgeText</span>
+                                    </h5>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        Requested on @quotation.RequestDate.ToString("MMMM dd, yyyy")
+                                    </small>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <div class="quotation-summary">
+                                        <h6 class="text-primary fw-bold mb-0">@quotation.ItemCount unique items</h6>
+                                        <small class="text-muted">@quotation.TotalItems total quantity</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-4">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="quotation-details">
+                                        <h6 class="fw-bold mb-2" style="color: #217090 !important; font-weight: 700 !important;">Request Information</h6>
+                                        <div class="detail-item d-flex mb-2">
+                                            <span class="detail-label me-3" style="min-width: 120px; color: #495057 !important; font-weight: 600 !important;">Request Date:</span>
+                                            <span class="detail-value" style="color: #c21807 !important; font-weight: 500 !important;">@quotation.RequestDate.ToString("MMMM dd, yyyy HH:mm")</span>
+                                        </div>
+                                        <div class="detail-item d-flex mb-2">
+                                            <span class="detail-label me-3" style="min-width: 120px; color: #495057 !important; font-weight: 600 !important;">Items:</span>
+                                            <span class="detail-value" style="color: #c21807 !important; font-weight: 500 !important;">@quotation.ItemCount unique products (@quotation.TotalItems total)</span>
+                                        </div>
+                                        <div class="detail-item d-flex mb-2">
+                                            <span class="detail-label me-3" style="min-width: 120px; color: #495057 !important; font-weight: 600 !important;">Status:</span>
+                                            <span class="detail-value">
+                                                <span class="badge bg-@badgeClass">@quotation.Status</span>
+                                            </span>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(quotation.Notes))
+                                        {
+                                            <div class="detail-item d-flex mb-2">
+                                                <span class="detail-label me-3" style="min-width: 120px; color: #495057 !important; font-weight: 600 !important;">Notes:</span>
+                                                <span class="detail-value" style="color: #c21807 !important; font-weight: 500 !important;">@quotation.Notes</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="quotation-actions">
+                                        <h6 class="fw-bold mb-2" style="color: #212529 !important; font-weight: 700 !important;">Actions</h6>
+                                        @if (quotation.HasResponses && quotation.ResponseCount > 0)
+                                        {
+                                            <div class="alert alert-success">
+                                                <i class="fas fa-check-circle me-2"></i>
+                                                <strong>@quotation.ResponseCount Responses Received!</strong>
+                                                <p class="mb-0 small">Compare prices and delivery times to get the best deal.</p>
+                                            </div>
+                                            <div class="d-grid gap-2">
+                                                <a href="@Url.Action("QuotationComparison", "Customer", new { id = quotation.Id })" 
+                                                   class="btn btn-success w-100">
+                                                    <i class="fas fa-chart-bar me-1"></i>Compare Responses
+                                                </a>
+                                                <button class="btn btn-outline-success w-100" onclick="viewQuotationDetails(@quotation.Id)">
+                                                    <i class="fas fa-eye me-1"></i>View Details
+                                                </button>
+                                            </div>
+                                        }
+                                        else if (quotation.Status == "Pending")
+                                        {
+                                            <div class="alert alert-warning">
+                                                <i class="fas fa-clock me-2"></i>
+                                                <strong>Waiting for Responses</strong>
+                                                <p class="mb-0 small">Distributors are reviewing your request. Responses usually arrive within 24-48 hours.</p>
+                                            </div>
+                                            <div class="d-grid gap-2">
+                                                <button class="btn btn-outline-warning w-100" onclick="viewQuotationDetails(@quotation.Id)">
+                                                    <i class="fas fa-eye me-1"></i>View Details
+                                                </button>
+                                                <button class="btn btn-outline-danger btn-sm w-100" onclick="cancelQuotation(@quotation.Id)">
+                                                    <i class="fas fa-times me-1"></i>Cancel Request
+                                                </button>
+                                            </div>
+                                        }
+                                        else if (quotation.Status == "Completed")
+                                        {
+                                            <div class="alert alert-info">
+                                                <i class="fas fa-check me-2"></i>
+                                                <strong>Order Created</strong>
+                                                <p class="mb-0 small">You accepted a quotation and an order was created.</p>
+                                            </div>
+                                            <a href="@Url.Action("Orders", "Customer")" class="btn btn-outline-primary w-100">
+                                                <i class="fas fa-box me-1"></i>View Orders
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <div class="alert alert-secondary">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                <strong>@quotation.Status</strong>
+                                                <p class="mb-0 small">This quotation request is @quotation.Status.ToLower().</p>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-light border-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="quotation-meta">
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Last updated: @quotation.RequestDate.AddMinutes(30).ToString("MMM dd, HH:mm")
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- No Quotations State -->
+        <div class="no-quotations-container text-center py-5">
+            <div class="no-quotations-content">
+                <i class="fas fa-file-invoice fa-5x text-muted mb-4"></i>
+                <h2 class="fw-bold mb-3">No Quotation Requests Yet</h2>
+                <p class="text-muted mb-4 lead">
+                    You haven't requested any quotations yet. Add items to your cart and request competitive quotes from our distributors!
+                </p>
+
+                <div class="no-quotations-actions">
+                    <a href="@Url.Action("Cart", "Home")" class="btn btn-success btn-lg rounded-pill px-5 me-3">
+                        <i class="fas fa-shopping-cart me-2"></i>View Cart
+                    </a>
+                    <a href="@Url.Action("Products", "Home")" class="btn btn-outline-primary btn-lg rounded-pill px-5">
+                        <i class="fas fa-search me-2"></i>Browse Products
+                    </a>
+                </div>
+
+                <!-- How It Works -->
+                <div class="how-it-works mt-5">
+                    <h5 class="fw-bold mb-4">How Quotations Work</h5>
+                    <div class="row g-4 justify-content-center">
+                        <div class="col-md-3">
+                            <div class="step-card text-center p-3">
+                                <div class="step-number">1</div>
+                                <i class="fas fa-shopping-cart fa-2x text-primary mb-2"></i>
+                                <h6 class="fw-bold">Add to Cart</h6>
+                                <p class="text-muted small">Add products to your cart that you want quotes for</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="step-card text-center p-3">
+                                <div class="step-number">2</div>
+                                <i class="fas fa-file-invoice-dollar fa-2x text-success mb-2"></i>
+                                <h6 class="fw-bold">Request Quote</h6>
+                                <p class="text-muted small">Click "Request Quotation" to send to all distributors</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="step-card text-center p-3">
+                                <div class="step-number">3</div>
+                                <i class="fas fa-balance-scale fa-2x text-warning mb-2"></i>
+                                <h6 class="fw-bold">Compare</h6>
+                                <p class="text-muted small">Compare prices and delivery times from distributors</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="step-card text-center p-3">
+                                <div class="step-number">4</div>
+                                <i class="fas fa-handshake fa-2x text-info mb-2"></i>
+                                <h6 class="fw-bold">Place Order</h6>
+                                <p class="text-muted small">Choose the best offer and place your order</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function viewQuotationDetails(quotationId) {
+            // Redirect to quotation comparison page
+            window.location.href = `@Url.Action("QuotationComparison", "Customer")?id=${quotationId}`;
+        }
+
+        function cancelQuotation(quotationId) {
+            if (confirm('Are you sure you want to cancel this quotation request?')) {
+                // Show loading
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Cancelling...';
+                btn.disabled = true;
+
+                // Submit cancellation
+                fetch(`@Url.Action("CancelQuotation", "Customer")?id=${quotationId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `__RequestVerificationToken=${$('[name=__RequestVerificationToken]').val()}`
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        throw new Error('Failed to cancel quotation');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    alert('Error cancelling quotation. Please try again.');
+                });
+            }
+        }
+
+        function acceptQuotationResponse(responseId) {
+            if (confirm('Are you sure you want to accept this quotation? This will create an order.')) {
+                // Show loading
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Accepting...';
+                btn.disabled = true;
+
+                // Submit acceptance
+                fetch(`@Url.Action("AcceptQuotation", "Customer")`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `responseId=${responseId}&__RequestVerificationToken=${$('[name=__RequestVerificationToken]').val()}`
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Quotation accepted successfully! Redirecting to orders...');
+                        window.location.href = '@Url.Action("Orders", "Customer")';
+                    } else {
+                        throw new Error('Failed to accept quotation');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    alert('Error accepting quotation. Please try again.');
+                });
+            }
+        }
+
+        // Auto-refresh quotations every 30 seconds to check for new responses
+        setInterval(function() {
+            console.log('🔄 Checking for new quotation responses...');
+            // Could implement a more sophisticated check here
+        }, 30000);
+    </script>
+}

@@ -1,0 +1,361 @@
+﻿@model QuotationComparisonDto
+@{
+    ViewData["Title"] = $"Compare Quotations - Request #{Model.RequestId}";
+    Layout = "_CustomerLayout";
+}
+
+<!-- Add anti-forgery token for CSRF protection -->
+@Html.AntiForgeryToken()
+
+<!-- ✅ ENHANCED: Add styles for better font visibility -->
+<style>
+    /* Enhanced text visibility for comparison page */
+    .page-header h1 { color: #212529 !important; font-weight: 700 !important; }
+    .page-header p { color: #6c757d !important; font-weight: 500 !important; }
+    .card-header h5 { color: #212529 !important; font-weight: 700 !important; }
+    .card-body { color: #212529 !important; }
+    .detail-row .detail-label { color: #495057 !important; font-weight: 600 !important; }
+    .detail-row .detail-value { color: #212529 !important; font-weight: 500 !important; }
+    .price-amount { color: #0d6efd !important; font-weight: 700 !important; }
+    .summary-item h3 { color: #212529 !important; font-weight: 700 !important; }
+    .summary-item p { color: #6c757d !important; font-weight: 500 !important; }
+    .no-responses-container h2 { color: #212529 !important; font-weight: 700 !important; }
+    .no-responses-container p { color: #6c757d !important; font-weight: 500 !important; }
+    .timeline-content h6 { color: #212529 !important; font-weight: 600 !important; }
+    .timeline-content p { color: #6c757d !important; font-weight: 500 !important; }
+    .badge { font-weight: 600 !important; }
+    .btn { font-weight: 600 !important; }
+</style>
+
+<div class="compare-quotations-container">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2">
+                    <i class="fas fa-balance-scale text-warning me-3"></i>Compare Quotations
+                </h1>
+                <p class="text-muted mb-0">Quotation Request #@Model.RequestId - Choose the best offer from our distributors</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="@Url.Action("Quotations", "Customer")" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Quotations
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Found && Model.Responses.Any())
+    {
+        <!-- Comparison Summary -->
+        <div class="comparison-summary mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="summary-item">
+                                <h3 class="fw-bold text-success">$@Model.BestPrice.ToString("N2")</h3>
+                                <p class="text-muted mb-0">Best Price</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="summary-item">
+                                <h3 class="fw-bold text-danger">$@Model.WorstPrice.ToString("N2")</h3>
+                                <p class="text-muted mb-0">Highest Price</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="summary-item">
+                                <h3 class="fw-bold text-primary">$@Model.AveragePrice.ToString("N2")</h3>
+                                <p class="text-muted mb-0">Average Price</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="summary-item">
+                                <h3 class="fw-bold text-info">@Model.BestDelivery days</h3>
+                                <p class="text-muted mb-0">Fastest Delivery</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quotation Responses -->
+        <div class="quotation-responses">
+            <div class="row g-4">
+                @foreach (var response in Model.Responses.OrderBy(r => r.TotalPrice))
+                {
+                    var isBestPrice = response.TotalPrice == Model.BestPrice;
+                    var isFastestDelivery = response.AverageDeliveryDays == Model.BestDelivery;
+
+                    <div class="col-lg-4">
+                        <div class="quotation-response-card @(isBestPrice ? "best-price" : "")">
+                            <div class="card h-100 border-0 shadow-sm">
+                                @if (isBestPrice)
+                                {
+                                    <div class="best-price-badge">
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-crown me-1"></i>Best Price
+                                        </span>
+                                    </div>
+                                }
+
+                                <div class="card-header bg-white border-0 text-center py-3">
+                                    <h5 class="fw-bold mb-1">@response.DistributorName</h5>
+                                    <small class="text-muted">Submitted @response.SubmissionDate.ToString("MMM dd, HH:mm")</small>
+                                </div>
+
+                                <div class="card-body p-4">
+                                    <!-- Price -->
+                                    <div class="price-section text-center mb-4">
+                                        <h2 class="price-amount fw-bold text-primary mb-1">$@response.TotalPrice.ToString("N2")</h2>
+                                        <small class="text-muted">Total for @response.ItemCount items</small>
+                                        @if (isBestPrice)
+                                        {
+                                            <div class="mt-2">
+                                                <span class="badge bg-success rounded-pill">
+                                                    <i class="fas fa-star me-1"></i>Lowest Price
+                                                </span>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <!-- Details -->
+                                    <div class="response-details">
+                                        <div class="detail-row">
+                                            <span class="detail-label">
+                                                <i class="fas fa-shipping-fast text-info me-2"></i>
+                                                Delivery Time:
+                                            </span>
+                                            <span class="detail-value fw-bold">
+                                                @response.AverageDeliveryDays days
+                                                @if (isFastestDelivery)
+                                                {
+                                                    <i class="fas fa-bolt text-warning ms-1" title="Fastest Delivery"></i>
+                                                }
+                                            </span>
+                                        </div>
+
+                                        <div class="detail-row">
+                                            <span class="detail-label">
+                                                <i class="fas fa-box text-secondary me-2"></i>
+                                                Items:
+                                            </span>
+                                            <span class="detail-value">@response.ItemCount products</span>
+                                        </div>
+
+                                        <div class="detail-row">
+                                            <span class="detail-label">
+                                                <i class="fas fa-check-circle text-success me-2"></i>
+                                                Status:
+                                            </span>
+                                            <span class="detail-value">
+                                                <span class="badge bg-success rounded-pill">@response.Status</span>
+                                            </span>
+                                        </div>
+
+                                        @if (!string.IsNullOrEmpty(response.Notes))
+                                        {
+                                            <div class="detail-row">
+                                                <span class="detail-label">
+                                                    <i class="fas fa-sticky-note text-warning me-2"></i>
+                                                    Notes:
+                                                </span>
+                                                <span class="detail-value">@response.Notes</span>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="card-footer bg-light border-0 p-3">
+                                    <div class="d-grid">
+                                        <button onclick="selectQuotation(@response.Id, @response.DistributorId)"
+                                                class="btn @(isBestPrice ? "btn-success" : "btn-primary") rounded-pill">
+                                            <i class="fas fa-handshake me-2"></i>
+                                            @(isBestPrice ? "Choose Best Price" : "Select This Quote")
+                                        </button>
+                                    </div>
+                                    <div class="text-center mt-2">
+                                        <button onclick="viewDistributorDetails(@response.DistributorId)"
+                                                class="btn btn-link btn-sm text-decoration-none">
+                                            <i class="fas fa-info-circle me-1"></i>Distributor Details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="comparison-table mt-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-table text-secondary me-2"></i>Detailed Comparison
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Distributor</th>
+                                    <th>Total Price</th>
+                                    <th>Delivery Time</th>
+                                    <th>Status</th>
+                                    <th>Submitted</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var response in Model.Responses.OrderBy(r => r.TotalPrice))
+                                {
+                                    <tr class="@(response.TotalPrice == Model.BestPrice ? "table-success" : "")">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-building text-primary me-2"></i>
+                                                <strong>@response.DistributorName</strong>
+                                                @if (response.TotalPrice == Model.BestPrice)
+                                                {
+                                                    <span class="badge bg-success ms-2">Best Price</span>
+                                                }
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold text-primary">$@response.TotalPrice.ToString("N2")</span>
+                                        </td>
+                                        <td>
+                                            @response.AverageDeliveryDays days
+                                            @if (response.AverageDeliveryDays == Model.BestDelivery)
+                                            {
+                                                <i class="fas fa-bolt text-warning ms-1" title="Fastest"></i>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success rounded-pill">@response.Status</span>
+                                        </td>
+                                        <td>@response.SubmissionDate.ToString("MMM dd, HH:mm")</td>
+                                        <td>
+                                            <button onclick="selectQuotation(@response.Id, @response.DistributorId)"
+                                                    class="btn btn-sm @(response.TotalPrice == Model.BestPrice ? "btn-success" : "btn-outline-primary")">
+                                                <i class="fas fa-check me-1"></i>Select
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- No Responses State -->
+        <div class="no-responses-container text-center py-5">
+            <div class="no-responses-content">
+                <i class="fas fa-hourglass-half fa-5x text-muted mb-4"></i>
+                <h2 class="fw-bold mb-3">No Responses Yet</h2>
+                <p class="text-muted mb-4 lead">
+                    We're still waiting for distributors to respond to your quotation request.
+                    This usually takes a few minutes to a few hours.
+                </p>
+
+                <div class="no-responses-actions">
+                    <a href="@Url.Action("Quotations", "Customer")" class="btn btn-primary btn-lg rounded-pill px-5 me-3">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Quotations
+                    </a>
+                    <button onclick="refreshPage()" class="btn btn-outline-primary btn-lg rounded-pill px-5">
+                        <i class="fas fa-refresh me-2"></i>Refresh
+                    </button>
+                </div>
+
+                <!-- Expected Timeline -->
+                <div class="expected-timeline mt-5">
+                    <h5 class="fw-bold mb-3">What to Expect</h5>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h6 class="fw-bold">Request Sent</h6>
+                                <p class="text-muted small">Your quotation request has been sent to all distributors</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-warning"></div>
+                            <div class="timeline-content">
+                                <h6 class="fw-bold">Distributors Review</h6>
+                                <p class="text-muted small">Distributors are reviewing your request and preparing quotes</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-info"></div>
+                            <div class="timeline-content">
+                                <h6 class="fw-bold">Responses Ready</h6>
+                                <p class="text-muted small">You'll be able to compare all responses and choose the best offer</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function selectQuotation(responseId, distributorId) {
+            if (confirm('Are you sure you want to accept this quotation and place an order with this distributor?')) {
+                // Show loading
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                btn.disabled = true;
+
+                // Submit quotation acceptance using the correct endpoint
+                fetch('@Url.Action("AcceptQuotation", "Customer")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `responseId=${responseId}&__RequestVerificationToken=${$('[name=__RequestVerificationToken]').val()}`
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Show success message and redirect
+                        alert('✅ Quotation accepted successfully! Your order has been created. Redirecting to orders...');
+                        window.location.href = '@Url.Action("Orders", "Customer")';
+                    } else {
+                        throw new Error('Failed to accept quotation');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    alert('❌ Error accepting quotation. Please try again.');
+                });
+            }
+        }
+
+        function viewDistributorDetails(distributorId) {
+            alert(`Viewing details for distributor ${distributorId}`);
+        }
+
+        function refreshPage() {
+            location.reload();
+        }
+
+        // Auto-refresh every 30 seconds to check for new responses
+        setInterval(function() {
+            if (@Model.Responses.Count < 3) {
+                console.log('🔄 Checking for new quotation responses...');
+            }
+        }, 30000);
+    </script>
+}

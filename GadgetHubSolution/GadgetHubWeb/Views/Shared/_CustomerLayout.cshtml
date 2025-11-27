@@ -1,0 +1,140 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gadget Hub</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/text-visibility.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="dashboard-body customer-dashboard">
+    <!-- 🎨 Clean Customer Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-gradient-primary fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="@Url.Action("Index", "Home")">
+                <i class="fas fa-rocket me-2"></i>Gadget Hub <span class="badge bg-light text-primary">Customer</span>
+            </a>
+
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle me-1"></i>@User.Identity.Name
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("Index", "Customer")">
+                                <i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("Orders", "Customer")">
+                                <i class="fas fa-box me-2 text-success"></i>My Orders
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("Quotations", "Customer")">
+                                <i class="fas fa-file-invoice-dollar me-2 text-warning"></i>Quotations
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("Products", "Home")">
+                                <i class="fas fa-store me-2 text-info"></i>Browse Products
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="@Url.Action("Cart", "Home")">
+                                <i class="fas fa-shopping-cart me-2 text-success"></i>Shopping Cart
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form method="post" action="@Url.Action("Logout", "Auth")" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dropdown-item">
+                                    <i class="fas fa-sign-out-alt me-2 text-danger"></i>Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 🎨 Clean Customer Sidebar -->
+    <div class="sidebar customer-sidebar">
+        <div class="sidebar-header">
+            <h5 class="text-white fw-bold">
+                <i class="fas fa-user-circle me-2"></i>Customer Portal
+            </h5>
+            <small class="text-light">Welcome, @User.Identity.Name</small>
+        </div>
+
+        <div class="sidebar-menu">
+            <a href="@Url.Action("Index", "Customer")" class="sidebar-item @(ViewContext.RouteData.Values["Action"].ToString() == "Index" ? "active" : "")">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="@Url.Action("Orders", "Customer")" class="sidebar-item @(ViewContext.RouteData.Values["Action"].ToString() == "Orders" ? "active" : "")">
+                <i class="fas fa-box"></i>
+                <span>My Orders</span>
+            </a>
+            <a href="@Url.Action("Quotations", "Customer")" class="sidebar-item @(ViewContext.RouteData.Values["Action"].ToString() == "Quotations" ? "active" : "")">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Quotations</span>
+            </a>
+            <a href="@Url.Action("Products", "Home")" class="sidebar-item">
+                <i class="fas fa-store"></i>
+                <span>Browse Products</span>
+            </a>
+            <a href="@Url.Action("Cart", "Home")" class="sidebar-item">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Shopping Cart</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 🎨 Clean Main Content -->
+    <div class="main-content">
+        <div class="container-fluid py-4">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["InfoMessage"] != null)
+            {
+                <div class="alert alert-info alert-dismissible fade show border-0 shadow-sm" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>@TempData["InfoMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @RenderBody()
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/dashboard.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

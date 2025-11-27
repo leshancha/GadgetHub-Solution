@@ -1,0 +1,961 @@
+/* 
+ * Global Text Visibility Override 
+ * This file ensures all text is visible across all pages
+ * Built by leshancha at 2025-07-31 14:30:00 UTC
+ */
+
+/* Force high contrast text visibility */
+body,
+html {
+    color: var(--text-primary) !important;
+}
+
+/* Ensure all text elements have proper contrast */
+h1, h2, h3, h4, h5, h6,
+p, span, div, a, label, li, td, th,
+.text, .content, .description, .title,
+.card-title, .card-text, .card-header,
+.alert, .badge, .btn {
+    color: var(--text-primary) !important;
+}
+
+/* Navigation text */
+.navbar .navbar-nav .nav-link,
+.navbar .navbar-brand {
+    color: white !important;
+    font-weight: 500 !important;
+}
+
+/* Sidebar text */
+.sidebar .sidebar-item,
+.sidebar .sidebar-header h5,
+.sidebar .sidebar-header small {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.sidebar .sidebar-item:hover,
+.sidebar .sidebar-item.active {
+    color: white !important;
+}
+
+/* Form elements */
+.form-control,
+.form-select,
+.form-label,
+.form-check-label {
+    color: var(--text-primary) !important;
+}
+
+.form-control::placeholder {
+    color: var(--text-secondary) !important;
+    opacity: 0.8;
+}
+
+/* Table text */
+.table,
+.table th,
+.table td {
+    color: var(--text-primary) !important;
+}
+
+/* Button text */
+.btn {
+    font-weight: 500 !important;
+}
+
+.btn-primary,
+.btn-success,
+.btn-warning,
+.btn-danger,
+.btn-info {
+    color: white !important;
+}
+
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-outline-success,
+.btn-outline-warning,
+.btn-outline-danger,
+.btn-outline-info {
+    color: var(--text-primary) !important;
+}
+
+/* Card text */
+.card,
+.card-body,
+.card-header,
+.card-footer {
+    color: var(--text-primary) !important;
+}
+
+.card-title,
+.card-subtitle,
+.card-text {
+    color: var(--text-primary) !important;
+}
+
+/* Alert text */
+.alert {
+    color: var(--text-primary) !important;
+}
+
+.alert-info,
+.alert-success,
+.alert-warning,
+.alert-danger {
+    color: var(--text-primary) !important;
+}
+
+/* Badge text - keep white for colored badges */
+.badge {
+    color: white !important;
+}
+
+.badge.bg-light,
+.badge.bg-secondary {
+    color: var(--text-primary) !important;
+}
+
+/* Dropdown text */
+.dropdown-menu {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--border-primary) !important;
+}
+
+.dropdown-item {
+    color: var(--text-primary) !important;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* List group text */
+.list-group-item {
+    color: var(--text-primary) !important;
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-primary) !important;
+}
+
+/* Modal text */
+.modal-content {
+    background-color: var(--card-bg) !important;
+    color: var(--text-primary) !important;
+}
+
+.modal-header,
+.modal-body,
+.modal-footer {
+    color: var(--text-primary) !important;
+}
+
+.modal-title {
+    color: var(--text-primary) !important;
+}
+
+/* Breadcrumb text */
+.breadcrumb-item {
+    color: var(--text-secondary) !important;
+}
+
+.breadcrumb-item.active {
+    color: var(--text-primary) !important;
+}
+
+.breadcrumb-item a {
+    color: var(--text-secondary) !important;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--primary-color) !important;
+}
+
+/* Pagination text */
+.page-link {
+    color: var(--text-primary) !important;
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-primary) !important;
+}
+
+.page-link:hover {
+    color: white !important;
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.page-item.active .page-link {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+/* Tab text */
+.nav-tabs .nav-link {
+    color: var(--text-secondary) !important;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color) !important;
+}
+
+.nav-pills .nav-link {
+    color: var(--text-secondary) !important;
+}
+
+.nav-pills .nav-link.active {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+}
+
+/* Tooltip and popover text */
+.tooltip-inner {
+    background-color: var(--text-primary) !important;
+    color: var(--bg-primary) !important;
+}
+
+.popover {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-primary) !important;
+}
+
+.popover-header {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+}
+
+.popover-body {
+    color: var(--text-primary) !important;
+}
+
+/* Special text classes */
+.text-muted {
+    color: var(--text-secondary) !important;
+}
+
+.text-dark {
+    color: var(--text-primary) !important;
+}
+
+.text-secondary {
+    color: var(--text-secondary) !important;
+}
+
+.text-light {
+    color: var(--text-tertiary) !important;
+}
+
+.text-body {
+    color: var(--text-primary) !important;
+}
+
+.text-body-secondary {
+    color: var(--text-secondary) !important;
+}
+
+/* Input group text */
+.input-group-text {
+    background-color: var(--bg-secondary) !important;
+    border-color: var(--border-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Progress bar text */
+.progress {
+    background-color: var(--bg-secondary) !important;
+}
+
+/* Offcanvas text */
+.offcanvas {
+    background-color: var(--card-bg) !important;
+    color: var(--text-primary) !important;
+}
+
+.offcanvas-header,
+.offcanvas-body {
+    color: var(--text-primary) !important;
+}
+
+.offcanvas-title {
+    color: var(--text-primary) !important;
+}
+
+/* Toast text */
+.toast {
+    background-color: var(--card-bg) !important;
+    color: var(--text-primary) !important;
+}
+
+.toast-header {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+}
+
+.toast-body {
+    color: var(--text-primary) !important;
+}
+
+/* Custom dashboard elements */
+.stats-number,
+.stats-label,
+.stats-footer {
+    color: var(--text-primary) !important;
+}
+
+.activity-content h6,
+.activity-content p {
+    color: var(--text-primary) !important;
+}
+
+/* Product specific elements */
+.product-title,
+.product-price,
+.product-description,
+.spec-label,
+.spec-value {
+    color: var(--text-primary) !important;
+}
+
+.current-price {
+    color: var(--primary-color) !important;
+}
+
+.original-price {
+    color: var(--text-secondary) !important;
+}
+
+/* Order and quotation elements */
+.detail-label {
+    color: #495057 !important;
+    font-weight: 600;
+    min-width: 140px;
+    display: inline-block;
+}
+
+.detail-value {
+    color: #212529 !important;
+    font-weight: 500;
+}
+
+/* Error page text */
+.error-content h1,
+.error-content h2,
+.error-content p {
+    color: var(--text-primary) !important;
+}
+
+/* Privacy page text */
+.privacy-content h1,
+.privacy-content h2,
+.privacy-content h3,
+.privacy-content p,
+.privacy-content li {
+    color: var(--text-primary) !important;
+}
+
+/* Dark theme overrides */
+[data-theme="dark"] body,
+[data-theme="dark"] html {
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    * {
+        font-weight: 500 !important;
+    }
+    
+    .btn {
+        font-weight: 600 !important;
+        border-width: 2px !important;
+    }
+    
+    .card {
+        border-width: 2px !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    * {
+        color: black !important;
+        background: white !important;
+    }
+    
+    .navbar,
+    .sidebar,
+    .btn,
+    .alert {
+        display: none !important;
+    }
+}
+
+/* Responsive text scaling */
+@media (max-width: 576px) {
+    body {
+        font-size: 16px !important; /* Larger base font for mobile */
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        line-height: 1.3 !important;
+    }
+    
+    .btn {
+        font-size: 16px !important; /* Larger button text for mobile */
+    }
+}
+
+/* Ensure minimum text sizes for accessibility */
+p, span, div, li, td, th {
+    min-height: 1.2em;
+    line-height: 1.5;
+}
+
+.small, small {
+    font-size: 0.875rem !important;
+    color: var(--text-secondary) !important;
+}
+
+/* Targeting specific element enhancements */
+/* ? ENHANCED: Global text visibility improvements */
+.text-dark-enhanced,
+.card-title,
+.card-header h1,
+.card-header h2,
+.card-header h3,
+.card-header h4,
+.card-header h5,
+.card-header h6 {
+    color: #212529 !important;
+    font-weight: 600;
+}
+
+/* Page headers */
+.page-header h1,
+.page-header h2,
+.dashboard-header h1,
+.dashboard-header h2 {
+    color: #212529 !important;
+    font-weight: 700;
+}
+
+/* Card content improvements */
+.card-body h1,
+.card-body h2,
+.card-body h3,
+.card-body h4,
+.card-body h5,
+.card-body h6 {
+    color: #212529 !important;
+    font-weight: 600;
+}
+
+.card-body p,
+.card-body span,
+.card-body div {
+    color: #212529;
+}
+
+/* Table improvements */
+.table th {
+    color: #212529 !important;
+    font-weight: 700;
+    background-color: #f8f9fa;
+}
+
+.table td {
+    color: #212529 !important;
+}
+
+/* Navigation improvements */
+.nav-link {
+    color: #495057 !important;
+    font-weight: 500;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+    color: #212529 !important;
+}
+
+/* Sidebar improvements */
+.sidebar-item {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.sidebar-item:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Button text improvements */
+.btn {
+    font-weight: 500;
+}
+
+/* Alert improvements */
+.alert h1,
+.alert h2,
+.alert h3,
+.alert h4,
+.alert h5,
+.alert h6 {
+    color: inherit !important;
+}
+
+/* Badge improvements */
+.badge {
+    font-weight: 600;
+}
+
+/* List group improvements */
+.list-group-item {
+    color: #212529 !important;
+}
+
+/* Dropdown improvements */
+.dropdown-item {
+    color: #212529 !important;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: #f8f9fa;
+    color: #212529 !important;
+}
+
+/* Modal improvements */
+.modal-title {
+    color: #212529 !important;
+    font-weight: 700;
+}
+
+.modal-body h1,
+.modal-body h2,
+.modal-body h3,
+.modal-body h4,
+.modal-body h5,
+.modal-body h6 {
+    color: #212529 !important;
+}
+
+/* Footer improvements */
+.card-footer small {
+    color: #6c757d !important;
+}
+
+/* Stats and metrics improvements */
+.stats-number,
+.stat-number {
+    color: #212529 !important;
+    font-weight: 700;
+}
+
+.stats-label,
+.stat-label {
+    color: #495057 !important;
+    font-weight: 500;
+}
+
+/* Force visibility for any missed elements */
+* {
+    color: inherit;
+}
+
+/* Fallback for extreme cases */
+body * {
+    color: var(--text-primary);
+}
+
+/* White text elements should stay white */
+.text-white,
+.navbar-dark .navbar-nav .nav-link,
+.navbar-dark .navbar-brand,
+.btn-primary,
+.btn-success,
+.btn-warning,
+.btn-danger,
+.btn-info,
+.badge:not(.bg-light):not(.bg-secondary) {
+    color: white !important;
+}
+
+/* ? ENHANCED TEXT VISIBILITY CSS */
+
+/* Global Text Improvements */
+body {
+    color: #212529 !important;
+    font-weight: 400;
+}
+
+/* Heading Enhancements */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    color: #212529 !important;
+    font-weight: 600 !important;
+}
+
+/* Text Color Classes */
+.text-dark-enhanced {
+    color: #212529 !important;
+    font-weight: 500;
+}
+
+.text-visible {
+    color: #212529 !important;
+    font-weight: 500;
+}
+
+/* Card Text Improvements */
+.card-body {
+    color: #212529 !important;
+}
+
+.card-body p,
+.card-body div,
+.card-body span {
+    color: #212529 !important;
+}
+
+.card-title {
+    color: #212529 !important;
+    font-weight: 600 !important;
+}
+
+.card-text {
+    color: #495057 !important;
+    font-weight: 400;
+}
+
+/* Table Text Improvements */
+.table th {
+    color: #212529 !important;
+    font-weight: 600 !important;
+    background-color: #f8f9fa !important;
+}
+
+.table td {
+    color: #212529 !important;
+    font-weight: 400;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa !important;
+}
+
+/* Form Label Improvements */
+.form-label {
+    color: #212529 !important;
+    font-weight: 500 !important;
+}
+
+/* Button Text Improvements */
+.btn {
+    font-weight: 500 !important;
+}
+
+.btn-primary {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+    color: #ffffff !important;
+}
+
+.btn-outline-primary {
+    color: #0d6efd !important;
+    border-color: #0d6efd !important;
+    font-weight: 500 !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+    color: #ffffff !important;
+}
+
+/* Navigation Text */
+.navbar-nav .nav-link {
+    color: #ffffff !important;
+    font-weight: 500 !important;
+}
+
+.navbar-brand {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+/* Sidebar Text */
+.sidebar-item {
+    color: #ffffff !important;
+    font-weight: 500 !important;
+}
+
+.sidebar-item:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.sidebar-item.active {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    font-weight: 600 !important;
+}
+
+/* Badge Improvements */
+.badge {
+    font-weight: 500 !important;
+}
+
+.badge.bg-primary {
+    background-color: #0d6efd !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-success {
+    background-color: #198754 !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+    color: #ffffff !important;
+}
+
+.badge.bg-info {
+    background-color: #0dcaf0 !important;
+    color: #212529 !important;
+}
+
+.badge.bg-secondary {
+    background-color: #6c757d !important;
+    color: #ffffff !important;
+}
+
+/* Alert Text */
+.alert {
+    color: #212529 !important;
+    font-weight: 400;
+}
+
+.alert-primary {
+    background-color: #cfe2ff !important;
+    border-color: #9ec5fe !important;
+    color: #084298 !important;
+}
+
+.alert-success {
+    background-color: #d1e7dd !important;
+    border-color: #a3cfbb !important;
+    color: #0a3622 !important;
+}
+
+.alert-warning {
+    background-color: #fff3cd !important;
+    border-color: #ffda6a !important;
+    color: #664d03 !important;
+}
+
+.alert-danger {
+    background-color: #f8d7da !important;
+    border-color: #f1aeb5 !important;
+    color: #58151c !important;
+}
+
+.alert-info {
+    background-color: #d1ecf1 !important;
+    border-color: #9eeaf9 !important;
+    color: #055160 !important;
+}
+
+/* Modal Text */
+.modal-title {
+    color: #212529 !important;
+    font-weight: 600 !important;
+}
+
+.modal-body {
+    color: #212529 !important;
+}
+
+/* Text Muted Override (make more visible) */
+.text-muted {
+    color: #6c757d !important;
+    font-weight: 400;
+}
+
+/* Small Text Visibility */
+small, .small {
+    color: #6c757d !important;
+    font-weight: 400;
+}
+
+/* Detail Items for Forms */
+.detail-label {
+    color: #495057 !important;
+    font-weight: 600 !important;
+    min-width: 140px;
+    display: inline-block;
+}
+
+.detail-value {
+    color: #212529 !important;
+    font-weight: 500 !important;
+}
+
+/* Dashboard Stats */
+.stat-value {
+    color: #212529 !important;
+    font-weight: 700 !important;
+    font-size: 2rem;
+}
+
+.stat-label {
+    color: #6c757d !important;
+    font-weight: 500 !important;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Product Grid Text */
+.product-name {
+    color: #212529 !important;
+    font-weight: 600 !important;
+}
+
+.product-price {
+    color: #198754 !important;
+    font-weight: 700 !important;
+}
+
+.product-brand {
+    color: #6c757d !important;
+    font-weight: 400;
+}
+
+/* List Items */
+.list-group-item {
+    color: #212529 !important;
+}
+
+.list-group-item-action:hover {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+}
+
+/* Dropdown Menu Text */
+.dropdown-menu {
+    background-color: #ffffff !important;
+}
+
+.dropdown-item {
+    color: #212529 !important;
+    font-weight: 400;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+}
+
+/* Pagination */
+.page-link {
+    color: #0d6efd !important;
+    font-weight: 500;
+}
+
+.page-link:hover {
+    color: #0a58ca !important;
+    background-color: #f8f9fa !important;
+}
+
+.page-item.active .page-link {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+    color: #ffffff !important;
+}
+
+/* Breadcrumb */
+.breadcrumb-item {
+    color: #6c757d !important;
+}
+
+.breadcrumb-item.active {
+    color: #212529 !important;
+    font-weight: 500;
+}
+
+/* Progress Bar Text */
+.progress-bar {
+    color: #ffffff !important;
+    font-weight: 500;
+}
+
+/* Input Field Labels and Help Text */
+.form-text {
+    color: #6c757d !important;
+    font-weight: 400;
+}
+
+.form-control {
+    color: #212529 !important;
+    font-weight: 400;
+}
+
+.form-control:focus {
+    color: #212529 !important;
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+}
+
+/* Custom Enhancements for Dark Backgrounds */
+.bg-dark .text-white,
+.bg-primary .text-white,
+.bg-success .text-white,
+.bg-danger .text-white,
+.bg-warning .text-dark {
+    font-weight: 500 !important;
+}
+
+/* Override Bootstrap's Low Contrast Colors */
+.text-secondary {
+    color: #495057 !important;
+}
+
+.bg-light {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+}
+
+/* Ensure visibility in all containers */
+.container,
+.container-fluid,
+.row,
+.col {
+    color: inherit;
+}
+
+/* Special Cases for Specific Components */
+.navbar-text {
+    color: #ffffff !important;
+    font-weight: 500 !important;
+}
+
+.footer {
+    color: #6c757d !important;
+}
+
+.footer a {
+    color: #495057 !important;
+    font-weight: 500;
+}
+
+.footer a:hover {
+    color: #212529 !important;
+}

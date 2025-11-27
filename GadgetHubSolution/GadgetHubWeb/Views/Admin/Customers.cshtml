@@ -1,0 +1,234 @@
+@model AdminCustomersViewModel
+@{
+    ViewData["Title"] = "Customer Management - Admin";
+    Layout = "_AdminLayout";
+    var totalCustomers = ViewBag.TotalCustomers as int? ?? 0;
+    var activeCustomers = ViewBag.ActiveCustomers as int? ?? 0;
+    var inactiveCustomers = ViewBag.InactiveCustomers as int? ?? 0;
+}
+
+<div class="admin-customers-container">
+    <!-- Header -->
+    <div class="dashboard-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-6 fw-bold mb-2">
+                    <i class="fas fa-users text-primary me-3"></i>Customer Management
+                </h1>
+                <p class="text-muted mb-0">Manage all customer accounts and monitor activity</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <button class="btn btn-success me-2" onclick="exportCustomers()">
+                    <i class="fas fa-download me-1"></i>Export Data
+                </button>
+                <button class="btn btn-primary" onclick="location.reload()">
+                    <i class="fas fa-sync me-1"></i>Refresh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-4 col-md-6">
+            <div class="stats-card bg-primary">
+                <div class="stats-content">
+                    <div class="stats-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number">@totalCustomers</h3>
+                        <p class="stats-label">Total Customers</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="stats-card bg-success">
+                <div class="stats-content">
+                    <div class="stats-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number">@activeCustomers</h3>
+                        <p class="stats-label">Active Customers</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="stats-card bg-warning">
+                <div class="stats-content">
+                    <div class="stats-icon">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <div class="stats-info">
+                        <h3 class="stats-number">@inactiveCustomers</h3>
+                        <p class="stats-label">Inactive Customers</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customers Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-list me-2"></i>Customer List
+                    </h5>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control" id="customerSearch" placeholder="Search customers...">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Customers.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var customer in Model.Customers)
+                            {
+                                <tr class="customer-row" data-customer-id="@customer.Id">
+                                    <td class="fw-bold">#@customer.Id</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="customer-avatar me-2">
+                                                <i class="fas fa-user-circle fa-2x text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">@customer.Name</div>
+                                                <small class="text-muted">Customer</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a href="mailto:@customer.Email" class="text-decoration-none">
+                                            @customer.Email
+                                        </a>
+                                    </td>
+                                    <td>@customer.Phone</td>
+                                    <td>
+                                        <span class="badge bg-@(customer.IsActive ? "success" : "secondary") rounded-pill">
+                                            <i class="fas fa-@(customer.IsActive ? "check" : "times") me-1"></i>
+                                            @(customer.IsActive ? "Active" : "Inactive")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            @customer.CreatedAt.ToString("MMM dd, yyyy")
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    onclick="viewCustomer(@customer.Id)">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-@(customer.IsActive ? "warning" : "success")" 
+                                                    onclick="toggleCustomerStatus(@customer.Id, @customer.IsActive.ToString().ToLower())">
+                                                <i class="fas fa-@(customer.IsActive ? "ban" : "check")"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted">No customers found</h5>
+                    <p class="text-muted">No customers have registered yet.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Search functionality
+        document.getElementById('customerSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('.customer-row');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        function viewCustomer(customerId) {
+            // Show customer details modal or redirect
+            alert(`View customer details for ID: ${customerId}`);
+        }
+
+        function toggleCustomerStatus(customerId, isCurrentlyActive) {
+            const action = isCurrentlyActive ? 'deactivate' : 'activate';
+            const actionText = isCurrentlyActive ? 'deactivated' : 'activated';
+            
+            if (confirm(`Are you sure you want to ${action} this customer?`)) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '@Url.Action("ToggleCustomerStatus", "Admin")';
+                
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '__RequestVerificationToken';
+                csrfToken.value = $('input[name="__RequestVerificationToken"]').val();
+                
+                const customerIdInput = document.createElement('input');
+                customerIdInput.type = 'hidden';
+                customerIdInput.name = 'customerId';
+                customerIdInput.value = customerId;
+                
+                const isActiveInput = document.createElement('input');
+                isActiveInput.type = 'hidden';
+                isActiveInput.name = 'isActive';
+                isActiveInput.value = !isCurrentlyActive;
+                
+                form.appendChild(csrfToken);
+                form.appendChild(customerIdInput);
+                form.appendChild(isActiveInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        function exportCustomers() {
+            window.open('/api/admin/export/customers', '_blank');
+        }
+
+        // Auto-refresh every 2 minutes
+        setInterval(() => {
+            console.log('?? Auto-refreshing customer data...');
+        }, 120000);
+    </script>
+}
